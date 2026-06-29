@@ -3,7 +3,8 @@ fn main() {
         .expect("No valid OneAPI installation found.");
 
     cxx_build::bridge("src/main.rs")
-        .compiler(compiler_root + "/bin/icpx")
+        .compiler(format!("{compiler_root}/bin/icpx"))
+        .include(format!("{compiler_root}/include"))
         .flag("-fsycl")
         .file("src/shim.cpp")
         .std("c++17")
