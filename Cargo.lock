@@ -164,6 +164,7 @@ dependencies = [
 name = "oneapi-rs"
 version = "0.1.0"
 dependencies = [
+ "cxx",
  "oneapi-rs-sys",
 ]
 
