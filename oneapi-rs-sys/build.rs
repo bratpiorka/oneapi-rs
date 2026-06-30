@@ -2,7 +2,9 @@ fn main() {
     let compiler_root = std::env::var("CMPLR_ROOT")
         .expect("No valid OneAPI installation found.");
 
-    cxx_build::bridge("src/main.rs")
+    cxx_build::bridges(&[
+            "src/platform.rs"
+        ])
         .compiler(format!("{compiler_root}/bin/icpx"))
         .include(format!("{compiler_root}/include"))
         .flag("-fsycl")
