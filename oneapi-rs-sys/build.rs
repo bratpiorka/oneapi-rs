@@ -11,15 +11,18 @@ fn main() {
         .expect("No valid OneAPI installation found.");
 
     let rust_sources = [
-        "src/platform-sys.rs"
+        "src/platform-sys.rs",
+        "src/device-sys.rs",
     ];
 
     let cpp_sources = [
-        "src/platform.cpp"
+        "src/platform.cpp",
+        "src/device.cpp",
     ];
 
     let cpp_headers = [
-        "include/platform.hpp"
+        "include/platform.hpp",
+        "include/device.hpp",
     ];
 
     cxx_build::bridges(&rust_sources)

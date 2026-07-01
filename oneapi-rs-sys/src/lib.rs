@@ -8,3 +8,6 @@
 
 #[path = "platform-sys.rs"]
 pub mod platform;
+
+#[path = "device-sys.rs"]
+pub mod device;
