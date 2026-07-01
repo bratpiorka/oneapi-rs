@@ -8,3 +8,8 @@
 
 #[path = "./info/platform-info.rs"]
 pub mod platform;
+
+#[path = "./info/device-info.rs"]
+pub mod device;
+
+pub use oneapi_rs_sys::device::ffi::DeviceType;
