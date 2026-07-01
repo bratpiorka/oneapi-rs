@@ -1,3 +1,11 @@
+//
+// Copyright (C) 2026 Intel Corporation
+//
+// Under the MIT License or the Apache License v2.0.
+// See LICENSE-MIT and LICENSE-APACHE for license information.
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//
+
 fn main() {
     let compiler_root = std::env::var("CMPLR_ROOT")
         .expect("No valid OneAPI installation found.");
