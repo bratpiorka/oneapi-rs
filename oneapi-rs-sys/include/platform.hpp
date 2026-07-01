@@ -22,7 +22,7 @@ class Platform {
 public:
   Platform(sycl::platform p) : inner(p) {}
 
-  static std::unique_ptr<std::vector<PlatformPtr>> get_platforms();
+  static rust::Vec<PlatformPtr> get_platforms();
   rust::String get_version() const;
   rust::String get_name() const;
   rust::String get_vendor() const;

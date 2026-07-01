@@ -7,15 +7,16 @@
 //
 
 #include "oneapi-rs-sys/include/platform.hpp"
-#include "oneapi-rs-sys/src/platform.rs.h"
+#include "oneapi-rs-sys/src/platform-sys.rs.h"
 
 namespace sycl_shims {
-std::unique_ptr<std::vector<PlatformPtr>> Platform::get_platforms() {
-  std::vector<PlatformPtr> platforms;
-  for (auto &&platform : sycl::platform::get_platforms())
-    platforms.push_back(PlatformPtr { std::make_shared<Platform>(platform) });
+rust::Vec<PlatformPtr> Platform::get_platforms() {
+  rust::Vec<PlatformPtr> platforms;
 
-  return std::make_unique<std::vector<PlatformPtr>>(platforms);
+  for (auto &&platform : sycl::platform::get_platforms())
+    platforms.push_back(PlatformPtr { std::make_unique<Platform>(platform) });
+
+  return platforms;
 }
 
 rust::String Platform::get_version() const {
