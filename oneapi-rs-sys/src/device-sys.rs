@@ -15,6 +15,7 @@ pub mod ffi {
         ptr: UniquePtr<Device>
     }
 
+    #[derive(Debug)]
     enum DeviceType {
         Cpu,
         Gpu,
