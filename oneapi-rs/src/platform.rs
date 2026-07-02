@@ -8,7 +8,7 @@
 
 use oneapi_rs_sys::platform::ffi;
 
-use crate::info::platform::PlatformInfo;
+use crate::{device::Device, info::platform::PlatformInfo};
 
 pub struct Platform(pub(crate) cxx::UniquePtr<ffi::Platform>);
 
@@ -17,6 +17,13 @@ impl Platform {
         ffi::get_platforms()
             .into_iter()
             .map(|platform| Self(platform.ptr))
+            .collect()
+    }
+
+    pub fn get_devices(&self) -> Vec<Device> {
+        ffi::get_devices(&self.0)
+            .into_iter()
+            .map(|device| Device(device.ptr))
             .collect()
     }
 
