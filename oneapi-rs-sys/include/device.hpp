@@ -14,8 +14,12 @@
 #include <memory>
 #include <vector>
 
-namespace sycl_shims::device {
+namespace sycl_shims {
 struct DevicePtr;
+struct PlatformPtr;
+} // namespace sycl_shims
+
+namespace sycl_shims::device {
 enum class DeviceType: std::uint8_t;
 
 rust::Vec<DevicePtr> get_devices();

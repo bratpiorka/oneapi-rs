@@ -8,11 +8,11 @@
 
 #[cxx::bridge(namespace = "sycl_shims::device")]
 pub mod ffi {
-    // This is a workaround - cxx currently doesn't support passing
-    // around vectors of pointers directly
-    // https://github.com/dtolnay/cxx/issues/774#issuecomment-808674945
-    struct DevicePtr {
-        ptr: UniquePtr<Device>
+    #[namespace = "sycl_shims"]
+    extern "C++" {
+        include!("oneapi-rs-sys/src/opaque-sys.rs.h");
+        type DevicePtr = crate::opaque::ffi::DevicePtr;
+        type PlatformPtr = crate::opaque::ffi::PlatformPtr;
     }
 
     #[derive(Debug)]

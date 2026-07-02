@@ -14,6 +14,21 @@ pub mod ffi {
         type Platform;
     }
 
+    // This is a workaround - cxx currently doesn't support passing
+    // around vectors of pointers directly
+    // https://github.com/dtolnay/cxx/issues/774#issuecomment-808674945
+    // We must use pointer wrapper structs instead.
+    struct DevicePtr {
+        ptr: UniquePtr<Device>
+    }
+
+    struct PlatformPtr {
+        ptr: UniquePtr<Platform>
+    }
+
     impl UniquePtr<Device> {}
     impl UniquePtr<Platform> {}
+
+    impl Vec<DevicePtr> {}
+    impl Vec<PlatformPtr> {}
 }

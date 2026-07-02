@@ -16,15 +16,14 @@
 #include <memory>
 #include <vector>
 
-namespace sycl_shims::device {
+namespace sycl_shims {
 struct DevicePtr;
-} // namespace sycl_shims::device
+struct PlatformPtr;
+} // namespace sycl_shims
 
 namespace sycl_shims::platform {
-struct PlatformPtr;
-
 rust::Vec<PlatformPtr> get_platforms();
-rust::Vec<device::DevicePtr> get_devices(Platform const&);
+rust::Vec<DevicePtr> get_devices(Platform const&);
 rust::String get_version(Platform const&);
 rust::String get_name(Platform const&);
 rust::String get_vendor(Platform const&);
