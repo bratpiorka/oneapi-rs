@@ -17,11 +17,10 @@
 namespace sycl_shims {
 struct DevicePtr;
 struct PlatformPtr;
+enum class DeviceType: std::uint8_t;
 } // namespace sycl_shims
 
 namespace sycl_shims::device {
-enum class DeviceType: std::uint8_t;
-
 rust::Vec<DevicePtr> get_devices();
 DeviceType get_device_type(Device const& device);
 rust::String get_version(Device const& device);

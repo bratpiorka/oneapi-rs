@@ -26,6 +26,17 @@ pub mod ffi {
         ptr: UniquePtr<Platform>
     }
 
+    #[derive(Debug)]
+    enum DeviceType {
+        Cpu,
+        Gpu,
+        Accelerator,
+        Custom,
+        Automatic,
+        All,
+        Unimplemented
+    }
+
     impl UniquePtr<Device> {}
     impl UniquePtr<Platform> {}
 

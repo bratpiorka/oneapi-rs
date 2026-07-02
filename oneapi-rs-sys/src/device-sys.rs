@@ -13,17 +13,7 @@ pub mod ffi {
         include!("oneapi-rs-sys/src/opaque-sys.rs.h");
         type DevicePtr = crate::opaque::ffi::DevicePtr;
         type PlatformPtr = crate::opaque::ffi::PlatformPtr;
-    }
-
-    #[derive(Debug)]
-    enum DeviceType {
-        Cpu,
-        Gpu,
-        Accelerator,
-        Custom,
-        Automatic,
-        All,
-        Unimplemented
+        type DeviceType = crate::opaque::ffi::DeviceType;
     }
 
     unsafe extern "C++" {
