@@ -14,7 +14,7 @@ pub struct Device(pub(crate) cxx::UniquePtr<ffi::Device>);
 
 impl Device {
     pub fn get_devices() -> Vec<Self> {
-        ffi::Device::get_devices()
+        ffi::get_devices()
             .into_iter()
             .map(|device| Self(device.ptr))
             .collect()
@@ -25,7 +25,7 @@ impl Device {
     }
 
     pub fn get_platform(&self) -> Platform {
-        let raw_platform = self.0.get_platform();
+        let raw_platform = ffi::get_platform(&self.0);
         Platform(raw_platform)
     }
 }

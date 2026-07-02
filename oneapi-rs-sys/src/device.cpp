@@ -11,8 +11,8 @@
 
 using dt = sycl::info::device_type;
 
-namespace sycl_shims {
-rust::Vec<DevicePtr> Device::get_devices() {
+namespace sycl_shims::device {
+rust::Vec<DevicePtr> get_devices() {
   rust::Vec<DevicePtr> devices;
 
   for (auto &&device : sycl::device::get_devices())
@@ -21,8 +21,8 @@ rust::Vec<DevicePtr> Device::get_devices() {
   return devices;
 }
 
-DeviceType Device::get_device_type() const {
-  auto type = this->inner.get_info<sycl::info::device::device_type>();
+DeviceType get_device_type(Device const& device) {
+  auto type = device.get_info<sycl::info::device::device_type>();
 
   switch(type) {
     case dt::cpu:
@@ -42,15 +42,15 @@ DeviceType Device::get_device_type() const {
   }
 }
 
-rust::String Device::get_version() const {
-  return this->inner.get_info<sycl::info::device::version>();
+rust::String get_version(Device const& device) {
+  return device.get_info<sycl::info::device::version>();
 }
 
-rust::String Device::get_name() const {
-  return this->inner.get_info<sycl::info::device::name>();
+rust::String get_name(Device const& device) {
+  return device.get_info<sycl::info::device::name>();
 }
 
-std::unique_ptr<Platform> Device::get_platform() const {
-  return std::make_unique<Platform>(this->inner.get_platform());
+std::unique_ptr<Platform> get_platform(Device const& device) {
+  return std::make_unique<Platform>(device.get_platform());
 }
-} // namespace sycl_shims
+} // namespace sycl_shims::device

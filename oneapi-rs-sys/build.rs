@@ -11,6 +11,7 @@ fn main() {
         .expect("No valid OneAPI installation found.");
 
     let rust_sources = [
+        "src/opaque-sys.rs",
         "src/platform-sys.rs",
         "src/device-sys.rs",
     ];
@@ -21,6 +22,7 @@ fn main() {
     ];
 
     let cpp_headers = [
+        "include/opaque.hpp",
         "include/platform.hpp",
         "include/device.hpp",
     ];

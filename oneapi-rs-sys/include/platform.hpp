@@ -9,25 +9,18 @@
 #pragma once
 
 #include "rust/cxx.h"
+#include "oneapi-rs-sys/include/opaque.hpp"
 
 #include <sycl/sycl.hpp>
 
 #include <memory>
 #include <vector>
 
-namespace sycl_shims {
+namespace sycl_shims::platform {
 struct PlatformPtr;
 
-class Platform {
-public:
-  Platform(sycl::platform p) : inner(p) {}
-
-  static rust::Vec<PlatformPtr> get_platforms();
-  rust::String get_version() const;
-  rust::String get_name() const;
-  rust::String get_vendor() const;
-
-private:
-  sycl::platform inner;
-};
-} // namespace sycl_shims
+rust::Vec<PlatformPtr> get_platforms();
+rust::String get_version(Platform const&);
+rust::String get_name(Platform const&);
+rust::String get_vendor(Platform const&);
+} // namespace sycl_shims::platform

@@ -9,8 +9,8 @@
 #include "oneapi-rs-sys/include/platform.hpp"
 #include "oneapi-rs-sys/src/platform-sys.rs.h"
 
-namespace sycl_shims {
-rust::Vec<PlatformPtr> Platform::get_platforms() {
+namespace sycl_shims::platform {
+rust::Vec<PlatformPtr> get_platforms() {
   rust::Vec<PlatformPtr> platforms;
 
   for (auto &&platform : sycl::platform::get_platforms())
@@ -19,15 +19,15 @@ rust::Vec<PlatformPtr> Platform::get_platforms() {
   return platforms;
 }
 
-rust::String Platform::get_version() const {
-  return this->inner.get_info<sycl::info::platform::version>();
+rust::String get_version(Platform const& platform) {
+  return platform.get_info<sycl::info::platform::version>();
 }
 
-rust::String Platform::get_name() const {
-  return this->inner.get_info<sycl::info::platform::name>();
+rust::String get_name(Platform const& platform) {
+  return platform.get_info<sycl::info::platform::name>();
 }
 
-rust::String Platform::get_vendor() const {
-  return this->inner.get_info<sycl::info::platform::vendor>();
+rust::String get_vendor(Platform const& platform) {
+  return platform.get_info<sycl::info::platform::vendor>();
 }
-} // namespace sycl_shims
+} // namespace sycl_shims::platform

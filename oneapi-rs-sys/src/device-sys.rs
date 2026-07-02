@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-#[cxx::bridge(namespace = "sycl_shims")]
+#[cxx::bridge(namespace = "sycl_shims::device")]
 pub mod ffi {
     // This is a workaround - cxx currently doesn't support passing
     // around vectors of pointers directly
@@ -28,17 +28,18 @@ pub mod ffi {
 
     unsafe extern "C++" {
         include!("oneapi-rs-sys/include/device.hpp");
- 
-        type Device;
-        type Platform = crate::platform::ffi::Platform;
 
-        #[Self = "Device"]
+        #[namespace = "sycl_shims"]
+        type Device = crate::opaque::ffi::Device;
+        #[namespace = "sycl_shims"]
+        type Platform = crate::opaque::ffi::Platform;
+
         fn get_devices() -> Vec<DevicePtr>;
 
-        fn get_platform(self: &Device) -> UniquePtr<Platform>;
+        fn get_platform(device: &Device) -> UniquePtr<Platform>;
 
-        fn get_device_type(self: &Device) -> DeviceType;
-        fn get_version(self: &Device) -> String;
-        fn get_name(self: &Device) -> String;
+        fn get_device_type(device: &Device) -> DeviceType;
+        fn get_version(device: &Device) -> String;
+        fn get_name(device: &Device) -> String;
     }
 }

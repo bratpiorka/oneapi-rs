@@ -7,6 +7,7 @@
 //
 
 use crate::platform::Platform;
+use oneapi_rs_sys::platform::ffi;
 
 pub trait PlatformInfo {
     type Item;
@@ -17,7 +18,7 @@ pub struct Version;
 impl PlatformInfo for Version {
     type Item = String;
     fn get_item(platform: &Platform) -> Self::Item {
-        platform.0.get_version()
+        ffi::get_version(&platform.0)
     }
 }
 
@@ -25,7 +26,7 @@ pub struct Name;
 impl PlatformInfo for Name {
     type Item = String;
     fn get_item(platform: &Platform) -> Self::Item {
-        platform.0.get_name()
+        ffi::get_name(&platform.0)
     }
 }
 
@@ -33,6 +34,6 @@ pub struct Vendor;
 impl PlatformInfo for Vendor {
     type Item = String;
     fn get_item(platform: &Platform) -> Self::Item {
-        platform.0.get_vendor()
+        ffi::get_vendor(&platform.0)
     }
 }

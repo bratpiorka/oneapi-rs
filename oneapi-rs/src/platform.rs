@@ -14,7 +14,7 @@ pub struct Platform(pub(crate) cxx::UniquePtr<ffi::Platform>);
 
 impl Platform {
     pub fn get_platforms() -> Vec<Self> {
-        ffi::Platform::get_platforms()
+        ffi::get_platforms()
             .into_iter()
             .map(|platform| Self(platform.ptr))
             .collect()

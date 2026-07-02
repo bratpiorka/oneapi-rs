@@ -9,28 +9,18 @@
 #pragma once
 
 #include "rust/cxx.h"
-#include "oneapi-rs-sys/include/platform.hpp"
-
-#include <sycl/sycl.hpp>
+#include "oneapi-rs-sys/include/opaque.hpp"
 
 #include <memory>
 #include <vector>
 
-namespace sycl_shims {
+namespace sycl_shims::device {
 struct DevicePtr;
 enum class DeviceType: std::uint8_t;
 
-class Device {
-public:
-  Device(sycl::device p) : inner(p) {}
-
-  static rust::Vec<DevicePtr> get_devices();
-  DeviceType get_device_type() const;
-  rust::String get_version() const;
-  rust::String get_name() const;
-  std::unique_ptr<Platform> get_platform() const;
-
-private:
-  sycl::device inner;
-};
-} // namespace sycl_shims
+rust::Vec<DevicePtr> get_devices();
+DeviceType get_device_type(Device const& device);
+rust::String get_version(Device const& device);
+rust::String get_name(Device const& device);
+std::unique_ptr<Platform> get_platform(Device const& device);
+} // namespace sycl_shims::device

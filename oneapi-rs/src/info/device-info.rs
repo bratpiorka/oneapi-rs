@@ -7,6 +7,7 @@
 //
 
 use crate::device::Device;
+use oneapi_rs_sys::device::ffi;
 
 pub trait DeviceInfo {
     type Item;
@@ -17,7 +18,7 @@ pub struct DeviceType;
 impl DeviceInfo for DeviceType {
     type Item = crate::info::DeviceType;
     fn get_item(device: &Device) -> Self::Item {
-        device.0.get_device_type()
+        ffi::get_device_type(&device.0)
     }
 }
 
@@ -25,7 +26,7 @@ pub struct Version;
 impl DeviceInfo for Version {
     type Item = String;
     fn get_item(device: &Device) -> Self::Item {
-        device.0.get_version()
+        ffi::get_version(&device.0)
     }
 }
 
@@ -33,6 +34,6 @@ pub struct Name;
 impl DeviceInfo for Name {
     type Item = String;
     fn get_item(device: &Device) -> Self::Item {
-        device.0.get_name()
+        ffi::get_name(&device.0)
     }
 }
