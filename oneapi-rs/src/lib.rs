@@ -9,3 +9,4 @@
 pub mod info;
 pub mod platform;
 pub mod device;
+pub mod queue;
