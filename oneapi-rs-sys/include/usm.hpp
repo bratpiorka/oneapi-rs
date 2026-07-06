@@ -6,17 +6,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-#[path = "types-sys.rs"]
-pub mod types;
+#pragma once
 
-#[path = "platform-sys.rs"]
-pub mod platform;
+#include "oneapi-rs-sys/include/types.hpp"
+#include "rust/cxx.h"
 
-#[path = "device-sys.rs"]
-pub mod device;
+#include <memory>
 
-#[path = "queue-sys.rs"]
-pub mod queue;
-
-#[path = "usm-sys.rs"]
-pub mod usm;
+namespace sycl_shims::usm {
+std::uint8_t* malloc_device(std::size_t, Queue const &);
+} // namespace sycl_shims::usm
