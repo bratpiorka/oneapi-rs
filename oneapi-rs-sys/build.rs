@@ -73,5 +73,5 @@ fn get_compiler_path() -> Result<PathBuf, Error> {
         return Ok(path);
     }
 
-    Err(Error::new(std::io::ErrorKind::NotFound, "No OneAPI compiler found"))
+    Err(Error::new(std::io::ErrorKind::NotFound, "No DPC++ compiler found"))
 }
