@@ -1,0 +1,3 @@
+[workspace]
+resolver = "3"
+members = ["oneapi-rs","oneapi-rs-sys"]
