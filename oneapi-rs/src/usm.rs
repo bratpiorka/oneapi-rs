@@ -1,89 +1,75 @@
-use std::{alloc::Layout, ptr::NonNull};
+//
+// Copyright (C) 2026 Intel Corporation
+//
+// Under the MIT License or the Apache License v2.0.
+// See LICENSE-MIT and LICENSE-APACHE for license information.
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//
+
+use crate::queue::Queue;
 
 use oneapi_rs_sys::usm::ffi;
+use allocator_api2::alloc::{Allocator, AllocError};
 
-use crate::{allocator::{AllocError, Allocator}, queue::Queue};
+use std::{alloc::Layout, marker::PhantomData, ptr::NonNull};
+
 type CxxResult<T> = cxx::core::result::Result<T, cxx::Exception>;
 
-trait UsmAllocator {
-    unsafe fn alloc(&self, alignment: usize, bytes: usize) -> CxxResult<*mut u8>;
-    fn get_queue(&self) -> &Queue;
+pub struct UsmAllocator<'a, T: UsmAllocatorKind> {
+    queue: &'a Queue,
+    _kind: PhantomData<T>
 }
 
-#[allow(dead_code)]
-pub(crate) struct DeviceAllocator<'a> {
-    queue: &'a Queue
+pub trait UsmAllocatorKind {
+    unsafe fn alloc(alignment: usize, bytes: usize, queue: &Queue) -> CxxResult<*mut u8>;
 }
 
-impl<'a> From<&'a Queue> for DeviceAllocator<'a> {
+impl<'a, T: UsmAllocatorKind> From<&'a Queue> for UsmAllocator<'a, T> {
     fn from(queue: &'a Queue) -> Self {
-        Self { queue }
+        Self {
+            queue,
+            _kind: PhantomData
+        }
     }
 }
 
-impl<'a> UsmAllocator for DeviceAllocator<'a> {
-    unsafe fn alloc(&self, alignment: usize, bytes: usize) -> CxxResult<*mut u8> {
-        unsafe { ffi::aligned_alloc_device(alignment, bytes, &self.queue.0) }
-    }
-
-    fn get_queue(&self) -> &Queue {
-        &self.queue
-    }
-}
-
-pub struct HostAllocator<'a> {
-    queue: &'a Queue
-}
-
-impl<'a> From<&'a Queue> for HostAllocator<'a> {
-    fn from(queue: &'a Queue) -> Self {
-        Self { queue }
-    }
-}
-
-impl<'a> UsmAllocator for HostAllocator<'a> {
-    unsafe fn alloc(&self, alignment: usize, bytes: usize) -> CxxResult<*mut u8> {
-        unsafe { ffi::aligned_alloc_host(alignment, bytes, &self.queue.0) }
-    }
-
-    fn get_queue(&self) -> &Queue {
-        &self.queue
-    }
-}
-
-pub struct SharedAllocator<'a> {
-    queue: &'a Queue
-}
-
-impl<'a> From<&'a Queue> for SharedAllocator<'a> {
-    fn from(queue: &'a Queue) -> Self {
-        Self { queue }
-    }
-}
-
-impl<'a> UsmAllocator for SharedAllocator<'a> {
-    unsafe fn alloc(&self, alignment: usize, bytes: usize) -> CxxResult<*mut u8> {
-        unsafe { ffi::aligned_alloc_shared(alignment, bytes, &self.queue.0) }
-    }
-
-    fn get_queue(&self) -> &Queue {
-        &self.queue
-    }
-}
-
-unsafe impl<T> Allocator for T
-where T: UsmAllocator {
+unsafe impl<T: UsmAllocatorKind> Allocator for UsmAllocator<'_, T> {
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
-        let ptr = unsafe { self.alloc(layout.align(), layout.size()) }
-            .map_err(|e| AllocError::Other(e.to_string()))?;
+        let ptr = unsafe { T::alloc(layout.align(), layout.size(), &self.queue) }
+            .map_err(|_e| AllocError)?;
 
-        let ptr = NonNull::new(ptr).ok_or(AllocError::NoMemory)?;
+        let ptr = NonNull::new(ptr).ok_or(AllocError)?;
         let slice = NonNull::slice_from_raw_parts(ptr, layout.size());
 
         Ok(slice)
     }
 
     unsafe fn deallocate(&self, ptr: NonNull<u8>, _layout: Layout) {
-        unsafe { ffi::free(ptr.as_ptr(), &self.get_queue().0); }
+        unsafe { ffi::free(ptr.as_ptr(), &self.queue.0); }
+    }
+}
+
+#[allow(dead_code)]
+pub(crate) struct DeviceAllocator;
+
+impl UsmAllocatorKind for DeviceAllocator {
+    unsafe fn alloc(alignment: usize, bytes: usize, queue: &Queue) -> CxxResult<*mut u8> {
+        unsafe { ffi::aligned_alloc_device(alignment, bytes, &queue.0) }
+    }
+}
+
+pub struct HostAllocator;
+
+impl UsmAllocatorKind for HostAllocator {
+    unsafe fn alloc(alignment: usize, bytes: usize, queue: &Queue) -> CxxResult<*mut u8> {
+        unsafe { ffi::aligned_alloc_host(alignment, bytes, &queue.0) }
+    }
+}
+
+pub struct SharedAllocator;
+
+impl UsmAllocatorKind for SharedAllocator {
+    unsafe fn alloc(alignment: usize, bytes: usize, queue: &Queue) -> CxxResult<*mut u8> {
+        unsafe { ffi::aligned_alloc_shared(alignment, bytes, &queue.0) }
     }
 }
