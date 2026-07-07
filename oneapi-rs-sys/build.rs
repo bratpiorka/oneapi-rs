@@ -33,7 +33,7 @@ fn main() {
         "include/platform.hpp",
         "include/device.hpp",
         "include/queue.hpp",
-        "src/usm.hpp",
+        "include/usm.hpp",
     ];
 
     cxx_build::bridges(&rust_sources)
