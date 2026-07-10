@@ -21,14 +21,14 @@ impl Queue {
         Self(ffi::new_queue())
     }
 
-    pub fn alloc_host<T, const N: usize>(&self) -> Buffer<T, N, UsmAllocator<'_, HostAllocator>> {
+    pub fn alloc_host<T>(&self, len: usize) -> Buffer<T, UsmAllocator<'_, HostAllocator>> {
         let allocator = UsmAllocator::from(self);
-        Buffer::new(allocator)
+        Buffer::new(allocator, len)
     }
 
-    pub fn alloc_shared<T, const N: usize>(&self) -> Buffer<T, N, UsmAllocator<'_, SharedAllocator>> {
+    pub fn alloc_shared<T>(&self, len: usize) -> Buffer<T, UsmAllocator<'_, SharedAllocator>> {
         let allocator = UsmAllocator::from(self);
-        Buffer::new(allocator)
+        Buffer::new(allocator, len)
     }
 }
 
