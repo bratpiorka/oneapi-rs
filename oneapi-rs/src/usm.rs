@@ -22,9 +22,9 @@ pub struct UsmAllocator<'a, T: UsmAllocatorKind> {
 }
 
 /// A marker trait for USM allocators.
-pub trait UsmAlloc : Allocator {}
+pub unsafe trait UsmAlloc : Allocator {}
 
-impl<'a, T: UsmAllocatorKind> UsmAlloc for UsmAllocator<'a, T> {}
+unsafe impl<'a, T: UsmAllocatorKind> UsmAlloc for UsmAllocator<'a, T> {}
 
 pub trait UsmAllocatorKind {
     unsafe fn alloc(alignment: usize, bytes: usize, queue: &Queue) -> CxxResult<*mut u8>;
