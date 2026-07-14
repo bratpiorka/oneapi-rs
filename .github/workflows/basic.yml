@@ -7,8 +7,21 @@ on:
   pull_request:
     branches: [ "main" ]
 
+  workflow_dispatch:
+    inputs:
+      deploy_documentation:
+        description: Deploy documentation
+        required: false
+        type: boolean
+        default: false
+
 env:
   CARGO_TERM_COLOR: always
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -46,3 +59,54 @@ jobs:
       
     - name: Run tests
       run: cargo test --verbose
+
+    - name: Generate documentation
+      run: |
+        cargo doc -p oneapi-rs --no-deps --verbose
+        cat > target/doc/index.html <<'HTML'
+        <!doctype html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta http-equiv="refresh" content="0; url=oneapi_rs/">
+            <title>oneapi-rs documentation</title>
+          </head>
+          <body>
+            <p><a href="oneapi_rs/">oneapi-rs documentation</a></p>
+          </body>
+        </html>
+        HTML
+
+    - name: Upload documentation artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation
+        path: target/doc
+
+  deploy-documentation:
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.deploy_documentation)
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Download documentation artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: documentation
+        path: target/doc
+
+    - name: Configure GitHub Pages
+      uses: actions/configure-pages@v5
+
+    - name: Upload documentation to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: target/doc
+
+    - name: Deploy documentation to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
