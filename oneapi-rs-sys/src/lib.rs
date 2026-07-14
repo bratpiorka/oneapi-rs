@@ -14,3 +14,9 @@ pub mod platform;
 
 #[path = "device-sys.rs"]
 pub mod device;
+
+#[path = "queue-sys.rs"]
+pub mod queue;
+
+#[path = "usm-sys.rs"]
+pub mod usm;

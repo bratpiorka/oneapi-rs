@@ -12,6 +12,7 @@ pub mod ffi {
         include!("oneapi-rs-sys/include/types.hpp");
         type Device;
         type Platform;
+        type Queue;
     }
 
     // This is a workaround - cxx currently doesn't support passing
@@ -39,6 +40,7 @@ pub mod ffi {
 
     impl UniquePtr<Device> {}
     impl UniquePtr<Platform> {}
+    impl UniquePtr<Queue> {}
 
     impl Vec<DevicePtr> {}
     impl Vec<PlatformPtr> {}

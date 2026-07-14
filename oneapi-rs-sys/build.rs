@@ -17,17 +17,23 @@ fn main() {
         "src/types-sys.rs",
         "src/platform-sys.rs",
         "src/device-sys.rs",
+        "src/queue-sys.rs",
+        "src/usm-sys.rs",
     ];
 
     let cpp_sources = [
         "src/platform.cpp",
         "src/device.cpp",
+        "src/queue.cpp",
+        "src/usm.cpp",
     ];
 
     let cpp_headers = [
         "include/types.hpp",
         "include/platform.hpp",
         "include/device.hpp",
+        "include/queue.hpp",
+        "include/usm.hpp",
     ];
 
     cxx_build::bridges(&rust_sources)
