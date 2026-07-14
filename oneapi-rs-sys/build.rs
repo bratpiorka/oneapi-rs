@@ -44,7 +44,6 @@ fn main() {
         .compile("oneapi-shim");
 
     println!("cargo::rustc-link-lib=sycl");
-    println!("cargo::rustc-link-lib=ze_loader");
     println!("cargo::rustc-link-lib=intlc");
 
     for source in cpp_sources {
@@ -66,7 +65,7 @@ fn get_compiler_path() -> Result<PathBuf, Error> {
     if let Ok(path) = std::env::var("CMPLR_ROOT") {
         let path = PathBuf::from(path).join("bin/icpx");
         if path.exists() {
-            return Ok(path)
+            return Ok(path);
         }
     }
     if let Ok(path) = which("icpx") {
@@ -79,5 +78,8 @@ fn get_compiler_path() -> Result<PathBuf, Error> {
         return Ok(path);
     }
 
-    Err(Error::new(std::io::ErrorKind::NotFound, "No DPC++ compiler found"))
+    Err(Error::new(
+        std::io::ErrorKind::NotFound,
+        "No DPC++ compiler found",
+    ))
 }

@@ -1,0 +1,48 @@
+name: Basic
+
+on:
+  push:
+    branches: [ "main" ]
+    
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check if oneAPI is already installed
+      id: check-oneapi
+      run: |
+        if [ -f /opt/intel/oneapi/setvars.sh ]; then
+          echo "installed=true" >> $GITHUB_OUTPUT
+        else
+          echo "installed=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Setup oneAPI
+      if: steps.check-oneapi.outputs.installed != 'true'
+      run: |
+        # download and install oneAPI
+        wget --no-verbose https://registrationcenter-download.intel.com/akdlm/IRC_NAS/33cb2a22-ddf1-4aa9-8d68-1f5a118acaf2/intel-oneapi-toolkit-2026.1.0.192_offline.sh
+        sudo sh ./intel-oneapi-toolkit-2026.1.0.192_offline.sh -a --silent --cli --eula accept
+
+    - name: Configure oneAPI environment
+      run: |
+        source /opt/intel/oneapi/setvars.sh
+        # copy envs to github 
+        printenv | grep -E '^(PATH|LD_LIBRARY_PATH|LIBRARY_PATH|CPATH|C_INCLUDE_PATH|CPLUS_INCLUDE_PATH)=' >> $GITHUB_ENV
+        icx --version
+        sycl-ls --verbose
+    
+    - name: Build
+      run: cargo build --verbose
+      
+    - name: Run tests
+      run: cargo test --verbose
