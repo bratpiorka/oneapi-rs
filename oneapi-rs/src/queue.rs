@@ -23,14 +23,14 @@ impl Queue {
 
     /// Allocates memory and creates a host-side [`Buffer`] that can store an array of T.
     /// Safety: the buffer contents are uninitialized.
-    pub unsafe fn alloc_uninit_host<T>(&self, len: usize) -> Buffer<T, UsmAllocator<'_, HostAllocator>> {
+    pub unsafe fn alloc_uninit_host<T>(&self, len: usize) -> Buffer<T, UsmAllocator<HostAllocator>> {
         let allocator = UsmAllocator::from(self);
         unsafe { Buffer::new(allocator, len) }
     }
 
     /// Allocates memory and creates a shared [`Buffer`] that can store an array of T.
     /// Safety: the buffer contents are uninitialized.
-    pub unsafe fn alloc_uninit_shared<T>(&self, len: usize) -> Buffer<T, UsmAllocator<'_, SharedAllocator>> {
+    pub unsafe fn alloc_uninit_shared<T>(&self, len: usize) -> Buffer<T, UsmAllocator<SharedAllocator>> {
         let allocator = UsmAllocator::from(self);
         unsafe { Buffer::new(allocator, len) }
     }

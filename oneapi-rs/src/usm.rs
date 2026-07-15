@@ -16,30 +16,30 @@ use std::{alloc::Layout, marker::PhantomData, ptr::NonNull};
 type CxxResult<T> = cxx::core::result::Result<T, cxx::Exception>;
 
 /// An instance of a USM allocator.
-pub struct UsmAllocator<'a, T: UsmAllocatorKind> {
-    queue: &'a Queue,
+pub struct UsmAllocator<T: UsmAllocatorKind> {
+    queue: Queue,
     _kind: PhantomData<T>
 }
 
 /// A marker trait for USM allocators.
 pub unsafe trait UsmAlloc : Allocator {}
 
-unsafe impl<'a, T: UsmAllocatorKind> UsmAlloc for UsmAllocator<'a, T> {}
+unsafe impl<T: UsmAllocatorKind> UsmAlloc for UsmAllocator<T> {}
 
 pub trait UsmAllocatorKind {
     unsafe fn alloc(alignment: usize, num_bytes: usize, queue: &Queue) -> CxxResult<*mut u8>;
 }
 
-impl<'a, T: UsmAllocatorKind> From<&'a Queue> for UsmAllocator<'a, T> {
-    fn from(queue: &'a Queue) -> Self {
+impl<T: UsmAllocatorKind> From<&Queue> for UsmAllocator<T> {
+    fn from(queue: &Queue) -> Self {
         Self {
-            queue,
+            queue: queue.clone(),
             _kind: PhantomData
         }
     }
 }
 
-unsafe impl<T: UsmAllocatorKind> Allocator for UsmAllocator<'_, T> {
+unsafe impl<T: UsmAllocatorKind> Allocator for UsmAllocator<T> {
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         let ptr = unsafe { T::alloc(layout.align(), layout.size(), &self.queue) }
             .map_err(|_e| AllocError)?;
