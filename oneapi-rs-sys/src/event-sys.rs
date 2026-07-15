@@ -15,5 +15,6 @@ pub mod ffi {
         type Event = crate::types::ffi::Event;
 
         fn wait(event: &mut UniquePtr<Event>);
+        fn clone(event: &Event) -> UniquePtr<Event>;
     }
 }

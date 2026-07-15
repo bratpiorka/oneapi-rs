@@ -15,4 +15,5 @@
 
 namespace sycl_shims::event {
 void wait(std::unique_ptr<Event> &);
+std::unique_ptr<Event> clone(Event const &);
 } // namespace sycl_shims::event

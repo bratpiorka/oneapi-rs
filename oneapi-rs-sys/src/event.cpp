@@ -13,4 +13,7 @@ namespace sycl_shims::event {
 void wait(std::unique_ptr<Event> & event) {
   event->wait();
 }
+std::unique_ptr<Event> clone(Event const & event) {
+  return std::make_unique<Event>(sycl::event(event));
+}
 } // namespace sycl_shims::event

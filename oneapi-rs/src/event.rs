@@ -21,3 +21,9 @@ impl From<cxx::UniquePtr<ffi::Event>> for Event {
         Self(value)
     }
 }
+
+impl Clone for Event {
+    fn clone(&self) -> Self {
+        ffi::clone(&self.0).into()
+    }
+}
