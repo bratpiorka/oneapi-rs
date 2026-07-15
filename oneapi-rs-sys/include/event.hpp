@@ -14,5 +14,5 @@
 #include <memory>
 
 namespace sycl_shims::event {
-void wait(Event &);
+void wait(std::unique_ptr<Event> &);
 } // namespace sycl_shims::event

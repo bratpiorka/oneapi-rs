@@ -14,6 +14,6 @@ pub mod ffi {
         #[namespace = "sycl_shims"]
         type Event = crate::types::ffi::Event;
 
-        fn wait(event: Pin<&mut Event>);
+        fn wait(event: &mut UniquePtr<Event>);
     }
 }

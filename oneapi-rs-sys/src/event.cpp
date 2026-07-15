@@ -10,7 +10,7 @@
 #include "oneapi-rs-sys/src/event-sys.rs.h"
 
 namespace sycl_shims::event {
-void wait(Event & event) {
-  event.wait();
+void wait(std::unique_ptr<Event> & event) {
+  event->wait();
 }
 } // namespace sycl_shims::event
