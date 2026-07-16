@@ -8,6 +8,11 @@
 
 // cxx requires Rust opaque types to be defined in the current crate.
 pub struct Waker(pub std::task::Waker);
+impl From<std::task::Waker> for Waker {
+    fn from(value: std::task::Waker) -> Self {
+        Waker(value)
+    }
+}
 
 #[cxx::bridge(namespace = "sycl_shims")]
 pub mod ffi {
