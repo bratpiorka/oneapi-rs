@@ -8,11 +8,17 @@
 
 use oneapi_rs_sys::event::ffi;
 
+use crate::info::event::EventInfo;
+
 pub struct Event(pub(crate) cxx::UniquePtr<ffi::Event>);
 
 impl Event {
     pub fn wait(&mut self) {
         ffi::wait(&mut self.0);
+    }
+
+    pub fn get_info<T: EventInfo>(&self) -> T::Item {
+        T::get_item(self)
     }
 }
 
