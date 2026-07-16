@@ -9,7 +9,7 @@
 use bytemuck::Pod;
 use oneapi_rs_sys::queue::ffi;
 
-use crate::{buffer::Buffer, device::Device, event::Event, usm::{HostAllocator, SharedAllocator, UsmAlloc, UsmAllocator}};
+use crate::{buffer::{Buffer, BufferInProgress}, device::Device, event::Event, usm::{HostAllocator, SharedAllocator, UsmAlloc, UsmAllocator}};
 
 /// The `Queue` connects a host program to a single device. Programs submit tasks to a device via the
 /// `Queue` and may monitor the `Queue` for completion. A program initiates the task by submitting
@@ -23,20 +23,20 @@ impl Queue {
     }
 
     /// Allocates zeroed memory and creates a host-side [`Buffer`] that can store an array of T.
-    pub fn alloc_host<T: Pod>(&mut self, len: usize) -> Buffer<T, UsmAllocator<HostAllocator>> {
+    pub fn alloc_host<T: Pod>(&mut self, len: usize) -> BufferInProgress<T, UsmAllocator<HostAllocator>> {
         unsafe {
             let mut buffer = self.alloc_uninit_host(len);
-            self.memset(&mut buffer, 0).wait();
-            buffer
+            let event = self.memset(&mut buffer, 0);
+            BufferInProgress::new(buffer, event)
         }
     }
 
     /// Allocates zeroed memory and creates a shared [`Buffer`] that can store an array of T.
-    pub fn alloc_shared<T: Pod>(&mut self, len: usize) -> Buffer<T, UsmAllocator<SharedAllocator>> {
+    pub fn alloc_shared<T: Pod>(&mut self, len: usize) -> BufferInProgress<T, UsmAllocator<SharedAllocator>> {
         unsafe {
             let mut buffer = self.alloc_uninit_shared(len);
-            self.memset(&mut buffer, 0).wait();
-            buffer
+            let event = self.memset(&mut buffer, 0);
+            BufferInProgress::new(buffer, event)
         }
     }
 

@@ -10,7 +10,7 @@ use oneapi_rs::queue::Queue;
 
 fn main() {
     let mut queue = Queue::new();
-    let mut buffer = queue.alloc_shared::<u32>(10);
+    let mut buffer = queue.alloc_shared::<u32>(10).wait();
 
     for e in buffer.iter() { 
         print!("{e} ")

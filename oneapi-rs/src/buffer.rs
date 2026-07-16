@@ -6,9 +6,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use std::{alloc::{Layout, handle_alloc_error}, ops::{Deref, DerefMut}, ptr::NonNull, slice};
+use std::{alloc::{Layout, handle_alloc_error}, ops::{Deref, DerefMut}, pin::Pin, ptr::NonNull, slice, task::{Context, Poll}};
 
-use crate::usm::UsmAlloc;
+use pin_project::pin_project;
+
+use crate::{event::{Event, EventFuture}, usm::UsmAlloc};
 
 /// The Buffer struct defines a shared array of one, two or three dimensions that can be used
 /// by the SYCL kernel. Buffers are templated on the type of their data, and the number of
@@ -76,5 +78,53 @@ impl<T, A: UsmAlloc> DerefMut for Buffer<T, A> {
 impl<T, A: UsmAlloc> Drop for Buffer<T, A> {
     fn drop(&mut self) {
         unsafe { self.allocator.deallocate(self.data.cast(), self.layout); }
+    }
+}
+
+pub struct BufferInProgress<T, A: UsmAlloc> {
+    buffer: Buffer<T, A>,
+    event: Event
+}
+
+impl<T, A: UsmAlloc> BufferInProgress<T, A> {
+    pub(crate) fn new(buffer: Buffer<T, A>, event: Event) -> Self {
+        Self {
+            buffer,
+            event
+        }
+    }
+}
+
+impl<T, A: UsmAlloc> BufferInProgress<T, A> {
+    pub fn wait(mut self) -> Buffer<T, A> {
+        self.event.wait();
+        self.buffer
+    }
+}
+
+#[pin_project]
+pub struct BufferFuture<T, A: UsmAlloc> {
+    buffer: Option<Buffer<T, A>>,
+    #[pin]
+    event_future: EventFuture
+}
+
+impl<T, A: UsmAlloc> Future for BufferFuture<T, A> {
+    type Output = Buffer<T, A>;
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let this = self.project();
+        this.event_future.poll(cx).map(|_| this.buffer.take().unwrap())
+    }
+}
+
+impl<T, A: UsmAlloc> IntoFuture for BufferInProgress<T, A> {
+    type Output = Buffer<T, A>;
+    type IntoFuture = BufferFuture<T, A>;
+
+    fn into_future(self) -> Self::IntoFuture {
+        Self::IntoFuture {
+            buffer: Some(self.buffer),
+            event_future: self.event.into_future()
+        }
     }
 }
