@@ -13,7 +13,12 @@
 
 #include <memory>
 
+namespace sycl_shims {
+enum class EventCommandStatus : std::uint8_t;
+} // namespace sycl_shims
+
 namespace sycl_shims::event {
 void wait(std::unique_ptr<Event> &);
+EventCommandStatus get_command_execution_status(Event const &);
 std::unique_ptr<Event> clone(Event const &);
 } // namespace sycl_shims::event

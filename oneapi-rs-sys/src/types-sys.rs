@@ -43,6 +43,14 @@ pub mod ffi {
         Unimplemented
     }
 
+    #[derive(Debug)]
+    enum EventCommandStatus {
+        Submitted,
+        Running,
+        Complete,
+        Unknown
+    }
+
     impl UniquePtr<Device> {}
     impl UniquePtr<Platform> {}
     impl UniquePtr<Queue> {}
