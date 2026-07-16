@@ -22,11 +22,11 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Check if oneAPI is already installed
       id: check-oneapi
@@ -57,9 +57,9 @@ jobs:
     
     - name: Build
       run: cargo build --verbose
-      
-    - name: Run tests
-      run: cargo test --verbose
+
+    - name: Run workspace tests
+      run: cargo test --workspace --verbose
 
     - name: Generate documentation
       run: |
@@ -79,14 +79,14 @@ jobs:
         HTML
 
     - name: Upload documentation artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: documentation
         path: target/doc
 
   deploy-documentation:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.deploy_documentation == 'true')
-    needs: build
+    needs: build-and-test
     runs-on: ubuntu-latest
 
     permissions:
@@ -100,19 +100,19 @@ jobs:
 
     steps:
     - name: Download documentation artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         name: documentation
         path: target/doc
 
     - name: Configure GitHub Pages
-      uses: actions/configure-pages@v5
+      uses: actions/configure-pages@v6
 
     - name: Upload documentation to GitHub Pages
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@v5
       with:
         path: target/doc
 
     - name: Deploy documentation to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@v5
