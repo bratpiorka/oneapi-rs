@@ -64,6 +64,10 @@ impl Queue {
         let num_bytes = buffer.get_byte_size();
         unsafe { ffi::memset(&mut self.0, ptr, value, num_bytes) }.into()
     }
+
+    pub fn barrier(&mut self) -> Event {
+        ffi::barrier(&mut self.0).into()
+    }
 }
 
 impl From<&Device> for Queue {
