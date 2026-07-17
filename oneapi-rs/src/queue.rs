@@ -68,6 +68,10 @@ impl Queue {
     pub fn barrier(&mut self) -> Event {
         ffi::barrier(&mut self.0).into()
     }
+
+    pub fn wait(&mut self) {
+        ffi::wait(&mut self.0);
+    }
 }
 
 impl From<&Device> for Queue {
