@@ -59,10 +59,14 @@ impl Queue {
         unsafe { Buffer::new(allocator, len) }
     }
 
+    /// Sets memory allocated with USM allocations.
+    /// Safety: the caller must make sure the underlying memory isn't being aliased somewhere else.
     pub unsafe fn memset<T, A: UsmAlloc>(&mut self, buffer: &mut Buffer<T, A>, value: i32) -> Event {
         unsafe { self.memset_with_deps(buffer, value, &[]) }
     }
 
+    /// Sets memory allocated with USM allocations after all specified events finish.
+    /// Safety: the caller must make sure the underlying memory isn't being aliased somewhere else.
     pub unsafe fn memset_with_deps<T, A: UsmAlloc>(
         &mut self,
         buffer: &mut Buffer<T, A>,
@@ -78,10 +82,12 @@ impl Queue {
         unsafe { ffi::memset(&mut self.0, ptr, value, num_bytes, dep_events) }.into()
     }
 
+    /// Submits a barrier to the queue.
     pub fn barrier(&mut self) -> Event {
         self.barrier_with_deps(&[])
     }
 
+    /// Submits a barrier to the queue after all specified events finish.
     pub fn barrier_with_deps(&mut self, dep_events: &[&Event]) -> Event {
         let dep_events = dep_events
             .iter()
@@ -90,6 +96,7 @@ impl Queue {
         ffi::barrier(&mut self.0, dep_events).into()
     }
 
+    /// Performs a blocking wait for the completion of all enqueued tasks in the queue.
     pub fn wait(&mut self) {
         ffi::wait(&mut self.0);
     }
