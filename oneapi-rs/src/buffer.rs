@@ -81,12 +81,13 @@ impl<T, A: UsmAlloc> Drop for Buffer<T, A> {
     }
 }
 
-pub struct BufferInProgress<T, A: UsmAlloc> {
+/// A [`Buffer`] whose initialization has been enqueued. You need to wait/await it.
+pub struct EnqueuedBuffer<T, A: UsmAlloc> {
     buffer: Buffer<T, A>,
     event: Event
 }
 
-impl<T, A: UsmAlloc> BufferInProgress<T, A> {
+impl<T, A: UsmAlloc> EnqueuedBuffer<T, A> {
     pub(crate) fn new(buffer: Buffer<T, A>, event: Event) -> Self {
         Self {
             buffer,
@@ -95,7 +96,8 @@ impl<T, A: UsmAlloc> BufferInProgress<T, A> {
     }
 }
 
-impl<T, A: UsmAlloc> BufferInProgress<T, A> {
+impl<T, A: UsmAlloc> EnqueuedBuffer<T, A> {
+    /// Waits for [`Buffer`] initialization to finish.
     pub fn wait(mut self) -> Buffer<T, A> {
         self.event.wait();
         self.buffer
@@ -103,6 +105,7 @@ impl<T, A: UsmAlloc> BufferInProgress<T, A> {
 }
 
 #[pin_project]
+/// A [`Future`] which represents a pending [`Buffer`] allocation.
 pub struct BufferFuture<T, A: UsmAlloc> {
     buffer: Option<Buffer<T, A>>,
     #[pin]
@@ -117,7 +120,7 @@ impl<T, A: UsmAlloc> Future for BufferFuture<T, A> {
     }
 }
 
-impl<T, A: UsmAlloc> IntoFuture for BufferInProgress<T, A> {
+impl<T, A: UsmAlloc> IntoFuture for EnqueuedBuffer<T, A> {
     type Output = Buffer<T, A>;
     type IntoFuture = BufferFuture<T, A>;
 
