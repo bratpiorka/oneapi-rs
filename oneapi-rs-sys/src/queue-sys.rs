@@ -24,5 +24,6 @@ pub mod ffi {
         fn clone(queue: &Queue) -> UniquePtr<Queue>;
         unsafe fn memset(queue: &mut UniquePtr<Queue>, ptr: *mut u8, value: i32, num_bytes: usize) -> UniquePtr<Event>;
         fn barrier(queue: &mut UniquePtr<Queue>) -> UniquePtr<Event>;
+        fn wait(queue: &mut UniquePtr<Queue>);
     }
 }

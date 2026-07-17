@@ -20,4 +20,5 @@ std::unique_ptr<Queue> new_queue_from_device(Device const &);
 std::unique_ptr<Queue> clone(Queue const &);
 std::unique_ptr<Event> memset(std::unique_ptr<Queue> &, std::uint8_t * ptr, int value, std::size_t num_bytes);
 std::unique_ptr<Event> barrier(std::unique_ptr<Queue> &);
+void wait(std::unique_ptr<Queue> &);
 } // namespace sycl_shims::queue

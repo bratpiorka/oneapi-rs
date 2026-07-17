@@ -36,4 +36,7 @@ std::unique_ptr<Event> memset(std::unique_ptr<Queue> & queue, std::uint8_t * ptr
 std::unique_ptr<Event> barrier(std::unique_ptr<Queue> & queue) {
   return std::make_unique<Event>(queue->ext_oneapi_submit_barrier());
 }
+void wait(std::unique_ptr<Queue> & queue) {
+  queue->wait();
+}
 } // namespace sycl_shims::queue
