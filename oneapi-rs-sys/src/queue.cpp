@@ -42,8 +42,11 @@ std::unique_ptr<Event> memset(
     deps.push_back(std::move(*e.ptr.release()));
   return std::make_unique<Event>(queue->memset(ptr, value, num_bytes, deps));
 }
-std::unique_ptr<Event> barrier(std::unique_ptr<Queue> & queue) {
-  return std::make_unique<Event>(queue->ext_oneapi_submit_barrier());
+std::unique_ptr<Event> barrier(std::unique_ptr<Queue> & queue, rust::Vec<EventPtr> dep_events) {
+  std::vector<sycl::event> deps;
+  for (auto&& e: dep_events)
+    deps.push_back(std::move(*e.ptr.release()));
+  return std::make_unique<Event>(queue->ext_oneapi_submit_barrier(deps));
 }
 void wait(std::unique_ptr<Queue> & queue) {
   queue->wait();

@@ -35,7 +35,7 @@ pub mod ffi {
             num_bytes: usize,
             dep_events: Vec<EventPtr>
         ) -> UniquePtr<Event>;
-        fn barrier(queue: &mut UniquePtr<Queue>) -> UniquePtr<Event>;
+        fn barrier(queue: &mut UniquePtr<Queue>, dep_events: Vec<EventPtr>) -> UniquePtr<Event>;
         fn wait(queue: &mut UniquePtr<Queue>);
     }
 }

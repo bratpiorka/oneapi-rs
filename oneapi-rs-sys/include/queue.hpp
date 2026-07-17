@@ -27,8 +27,8 @@ std::unique_ptr<Event> memset(
   std::uint8_t * ptr,
   int value,
   std::size_t num_bytes,
-  rust::Vec<EventPtr> dep_events
+  rust::Vec<EventPtr>
 );
-std::unique_ptr<Event> barrier(std::unique_ptr<Queue> &);
+std::unique_ptr<Event> barrier(std::unique_ptr<Queue> &, rust::Vec<EventPtr>);
 void wait(std::unique_ptr<Queue> &);
 } // namespace sycl_shims::queue

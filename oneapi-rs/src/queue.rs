@@ -79,7 +79,15 @@ impl Queue {
     }
 
     pub fn barrier(&mut self) -> Event {
-        ffi::barrier(&mut self.0).into()
+        self.barrier_with_deps(&[])
+    }
+
+    pub fn barrier_with_deps(&mut self, dep_events: &[&Event]) -> Event {
+        let dep_events = dep_events
+            .iter()
+            .map(|e| EventPtr { ptr: (*e).clone().0 })
+            .collect::<Vec<_>>();
+        ffi::barrier(&mut self.0, dep_events).into()
     }
 
     pub fn wait(&mut self) {
