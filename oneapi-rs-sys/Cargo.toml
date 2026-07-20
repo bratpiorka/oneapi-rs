@@ -6,6 +6,7 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 cxx = "1.0.194"
+futures = "0.3.33"
 
 [build-dependencies]
 cxx-build = "1.0.194"
