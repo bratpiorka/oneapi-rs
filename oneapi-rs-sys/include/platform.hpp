@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "rust/cxx.h"
 #include "oneapi-rs-sys/include/types.hpp"
+#include "rust/cxx.h"
 
 #include <sycl/sycl.hpp>
 
@@ -23,8 +23,8 @@ struct PlatformPtr;
 
 namespace sycl_shims::platform {
 rust::Vec<PlatformPtr> get_platforms();
-rust::Vec<DevicePtr> get_devices(Platform const&);
-rust::String get_version(Platform const&);
-rust::String get_name(Platform const&);
-rust::String get_vendor(Platform const&);
+rust::Vec<DevicePtr> get_devices(Platform const &);
+rust::String get_version(Platform const &);
+rust::String get_name(Platform const &);
+rust::String get_vendor(Platform const &);
 } // namespace sycl_shims::platform
