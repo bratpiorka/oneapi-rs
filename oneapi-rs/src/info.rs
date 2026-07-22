@@ -12,5 +12,11 @@ pub mod platform;
 #[path = "./info/device-info.rs"]
 pub mod device;
 
+#[path = "./info/event-info.rs"]
+pub mod event;
+
 /// The type of the SYCL device.
 pub use oneapi_rs_sys::device::ffi::DeviceType;
+
+/// Event status of the contained action associated with this event.
+pub use oneapi_rs_sys::event::ffi::EventCommandStatus;

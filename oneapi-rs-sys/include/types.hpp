@@ -14,4 +14,5 @@ namespace sycl_shims {
 using Device = sycl::device;
 using Platform = sycl::platform;
 using Queue = sycl::queue;
+using Event = sycl::event;
 }

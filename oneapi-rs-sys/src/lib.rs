@@ -20,3 +20,6 @@ pub mod queue;
 
 #[path = "usm-sys.rs"]
 pub mod usm;
+
+#[path = "event-sys.rs"]
+pub mod event;

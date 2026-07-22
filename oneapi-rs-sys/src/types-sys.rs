@@ -6,6 +6,29 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
+use std::sync::atomic::{Ordering::Relaxed, AtomicBool};
+
+use futures::task::AtomicWaker;
+
+pub struct SharedWaker {
+    pub waker: AtomicWaker,
+    pub done: AtomicBool
+}
+
+impl SharedWaker {
+    pub fn new() -> Self {
+        Self {
+            waker: AtomicWaker::new(),
+            done: AtomicBool::new(false)
+        }
+    }
+
+    pub fn wake(&self) {
+        self.done.store(true, Relaxed);
+        self.waker.wake();
+    }
+}
+
 #[cxx::bridge(namespace = "sycl_shims")]
 pub mod ffi {
     unsafe extern "C++" {
@@ -13,6 +36,7 @@ pub mod ffi {
         type Device;
         type Platform;
         type Queue;
+        type Event;
     }
 
     // This is a workaround - cxx currently doesn't support passing
@@ -26,6 +50,10 @@ pub mod ffi {
     struct PlatformPtr {
         ptr: UniquePtr<Platform>
     }
+    
+    struct EventPtr {
+        ptr: UniquePtr<Event>
+    }
 
     #[derive(Debug)]
     enum DeviceType {
@@ -38,10 +66,20 @@ pub mod ffi {
         Unimplemented
     }
 
+    #[derive(Debug)]
+    enum EventCommandStatus {
+        Submitted,
+        Running,
+        Complete,
+        Unknown
+    }
+
     impl UniquePtr<Device> {}
     impl UniquePtr<Platform> {}
     impl UniquePtr<Queue> {}
+    impl UniquePtr<Event> {}
 
     impl Vec<DevicePtr> {}
     impl Vec<PlatformPtr> {}
+    impl Vec<EventPtr> {}
 }

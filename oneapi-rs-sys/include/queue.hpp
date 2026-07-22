@@ -13,7 +13,22 @@
 
 #include <memory>
 
+namespace sycl_shims {
+struct EventPtr;
+} // namespace sycl_shims
+
 namespace sycl_shims::queue {
 std::unique_ptr<Queue> new_queue();
+std::unique_ptr<Queue> new_queue_immediate();
 std::unique_ptr<Queue> new_queue_from_device(Device const &);
+std::unique_ptr<Queue> clone(Queue const &);
+std::unique_ptr<Event> memset(
+  std::unique_ptr<Queue> &,
+  std::uint8_t * ptr,
+  int value,
+  std::size_t num_bytes,
+  rust::Vec<EventPtr>
+);
+std::unique_ptr<Event> barrier(std::unique_ptr<Queue> &, rust::Vec<EventPtr>);
+void wait(std::unique_ptr<Queue> &);
 } // namespace sycl_shims::queue

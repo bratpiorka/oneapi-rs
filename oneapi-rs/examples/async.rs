@@ -8,9 +8,10 @@
 
 use oneapi_rs::queue::Queue;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let mut queue = Queue::new();
-    let mut buffer = queue.alloc_shared::<u32>(10).wait();
+    let mut buffer = queue.alloc_shared::<u32>(10).await;
 
     for e in buffer.iter() { 
         print!("{e} ")
