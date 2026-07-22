@@ -6,10 +6,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
+pub mod buffer;
+pub mod device;
+pub mod event;
 pub mod info;
 pub mod platform;
-pub mod device;
 pub mod queue;
 pub mod usm;
-pub mod buffer;
-pub mod event;

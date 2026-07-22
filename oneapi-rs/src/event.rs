@@ -6,7 +6,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use std::{pin::Pin, task::{Context, Poll}, sync::atomic::Ordering::Relaxed};
+use std::{
+    pin::Pin,
+    sync::atomic::Ordering::Relaxed,
+    task::{Context, Poll},
+};
 
 use oneapi_rs_sys::{event::ffi, types::SharedWaker};
 
@@ -61,8 +65,7 @@ impl Future for EventFuture {
             // Safety: the Future which holds the SharedWaker is pinned - the pointer will remain valid.
             unsafe { ffi::register_callback(&mut queue.0, &this.event.0, this.shared) };
             this.queue.replace(queue);
-        }
-        else {
+        } else {
             // Quick check before registering to avoid wasting time
             if this.shared.done.load(Relaxed) {
                 return Poll::Ready(());
@@ -75,8 +78,7 @@ impl Future for EventFuture {
         // https://docs.rs/futures/latest/futures/task/struct.AtomicWaker.html#examples
         if this.shared.done.load(Relaxed) {
             Poll::Ready(())
-        }
-        else {
+        } else {
             Poll::Pending
         }
     }

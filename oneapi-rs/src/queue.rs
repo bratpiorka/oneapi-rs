@@ -9,7 +9,12 @@
 use bytemuck::Pod;
 use oneapi_rs_sys::{queue::ffi, types::ffi::EventPtr};
 
-use crate::{buffer::{Buffer, EnqueuedBuffer}, device::Device, event::Event, usm::{HostAllocator, SharedAllocator, UsmAlloc, UsmAllocator}};
+use crate::{
+    buffer::{Buffer, EnqueuedBuffer},
+    device::Device,
+    event::Event,
+    usm::{HostAllocator, SharedAllocator, UsmAlloc, UsmAllocator},
+};
 
 /// The `Queue` connects a host program to a single device. Programs submit tasks to a device via the
 /// `Queue` and may monitor the `Queue` for completion. A program initiates the task by submitting
@@ -28,7 +33,10 @@ impl Queue {
     }
 
     /// Allocates zeroed memory and creates a host-side [`Buffer`] that can store an array of T.
-    pub fn alloc_host<T: Pod>(&mut self, len: usize) -> EnqueuedBuffer<T, UsmAllocator<HostAllocator>> {
+    pub fn alloc_host<T: Pod>(
+        &mut self,
+        len: usize,
+    ) -> EnqueuedBuffer<T, UsmAllocator<HostAllocator>> {
         unsafe {
             let mut buffer = self.alloc_uninit_host(len);
             let event = self.memset(&mut buffer, 0);
@@ -37,7 +45,10 @@ impl Queue {
     }
 
     /// Allocates zeroed memory and creates a shared [`Buffer`] that can store an array of T.
-    pub fn alloc_shared<T: Pod>(&mut self, len: usize) -> EnqueuedBuffer<T, UsmAllocator<SharedAllocator>> {
+    pub fn alloc_shared<T: Pod>(
+        &mut self,
+        len: usize,
+    ) -> EnqueuedBuffer<T, UsmAllocator<SharedAllocator>> {
         unsafe {
             let mut buffer = self.alloc_uninit_shared(len);
             let event = self.memset(&mut buffer, 0);
@@ -47,21 +58,31 @@ impl Queue {
 
     /// Allocates memory and creates a host-side [`Buffer`] that can store an array of T.
     /// Safety: the buffer contents are uninitialized.
-    pub unsafe fn alloc_uninit_host<T>(&self, len: usize) -> Buffer<T, UsmAllocator<HostAllocator>> {
+    pub unsafe fn alloc_uninit_host<T>(
+        &self,
+        len: usize,
+    ) -> Buffer<T, UsmAllocator<HostAllocator>> {
         let allocator = UsmAllocator::from(self);
         unsafe { Buffer::new(allocator, len) }
     }
 
     /// Allocates memory and creates a shared [`Buffer`] that can store an array of T.
     /// Safety: the buffer contents are uninitialized.
-    pub unsafe fn alloc_uninit_shared<T>(&self, len: usize) -> Buffer<T, UsmAllocator<SharedAllocator>> {
+    pub unsafe fn alloc_uninit_shared<T>(
+        &self,
+        len: usize,
+    ) -> Buffer<T, UsmAllocator<SharedAllocator>> {
         let allocator = UsmAllocator::from(self);
         unsafe { Buffer::new(allocator, len) }
     }
 
     /// Sets memory allocated with USM allocations.
     /// Safety: the caller must make sure the underlying memory isn't being aliased somewhere else.
-    pub unsafe fn memset<T, A: UsmAlloc>(&mut self, buffer: &mut Buffer<T, A>, value: i32) -> Event {
+    pub unsafe fn memset<T, A: UsmAlloc>(
+        &mut self,
+        buffer: &mut Buffer<T, A>,
+        value: i32,
+    ) -> Event {
         unsafe { self.memset_with_deps(buffer, value, &[]) }
     }
 
@@ -71,13 +92,15 @@ impl Queue {
         &mut self,
         buffer: &mut Buffer<T, A>,
         value: i32,
-        dep_events: &[&Event]
+        dep_events: &[&Event],
     ) -> Event {
         let ptr = buffer.get_byte_ptr();
         let num_bytes = buffer.get_byte_size();
         let dep_events = dep_events
             .iter()
-            .map(|e| EventPtr { ptr: (*e).clone().0 })
+            .map(|e| EventPtr {
+                ptr: (*e).clone().0,
+            })
             .collect::<Vec<_>>();
         unsafe { ffi::memset(&mut self.0, ptr, value, num_bytes, dep_events) }.into()
     }
@@ -91,7 +114,9 @@ impl Queue {
     pub fn barrier_with_deps(&mut self, dep_events: &[&Event]) -> Event {
         let dep_events = dep_events
             .iter()
-            .map(|e| EventPtr { ptr: (*e).clone().0 })
+            .map(|e| EventPtr {
+                ptr: (*e).clone().0,
+            })
             .collect::<Vec<_>>();
         ffi::barrier(&mut self.0, dep_events).into()
     }
