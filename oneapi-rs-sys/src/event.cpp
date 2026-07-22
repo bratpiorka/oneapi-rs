@@ -17,6 +17,7 @@ void wait(std::unique_ptr<Event> &event) { event->wait(); }
 std::unique_ptr<Event> clone(Event const &event) {
   return std::make_unique<Event>(sycl::event(event));
 }
+
 EventCommandStatus get_command_execution_status(Event const &event) {
   auto status = event.get_info<sycl::info::event::command_execution_status>();
   switch (status) {
@@ -30,6 +31,7 @@ EventCommandStatus get_command_execution_status(Event const &event) {
     return EventCommandStatus::Unknown;
   }
 }
+
 void register_callback(std::unique_ptr<Queue> &queue, Event const &event,
                        SharedWaker const *waker) {
   queue->submit([=](sycl::handler &cgh) {

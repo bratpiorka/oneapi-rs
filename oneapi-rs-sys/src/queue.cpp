@@ -16,16 +16,20 @@ namespace sycl_shims::queue {
 std::unique_ptr<Queue> new_queue() {
   return std::make_unique<Queue>(sycl::queue({in_order()}));
 }
+
 std::unique_ptr<Queue> new_queue_immediate() {
   return std::make_unique<Queue>(
       sycl::queue({in_order(), immediate_command_list()}));
 }
+
 std::unique_ptr<Queue> new_queue_from_device(Device const &device) {
   return std::make_unique<Queue>(sycl::queue(device, {in_order()}));
 }
+
 std::unique_ptr<Queue> clone(Queue const &queue) {
   return std::make_unique<Queue>(sycl::queue(queue));
 }
+
 std::unique_ptr<Event> memset(std::unique_ptr<Queue> &queue, std::uint8_t *ptr,
                               int value, std::size_t num_bytes,
                               rust::Vec<EventPtr> dep_events) {
@@ -34,6 +38,7 @@ std::unique_ptr<Event> memset(std::unique_ptr<Queue> &queue, std::uint8_t *ptr,
     deps.push_back(std::move(*e.ptr));
   return std::make_unique<Event>(queue->memset(ptr, value, num_bytes, deps));
 }
+
 std::unique_ptr<Event> barrier(std::unique_ptr<Queue> &queue,
                                rust::Vec<EventPtr> dep_events) {
   std::vector<sycl::event> deps;
@@ -41,5 +46,6 @@ std::unique_ptr<Event> barrier(std::unique_ptr<Queue> &queue,
     deps.push_back(std::move(*e.ptr));
   return std::make_unique<Event>(queue->ext_oneapi_submit_barrier(deps));
 }
+
 void wait(std::unique_ptr<Queue> &queue) { queue->wait(); }
 } // namespace sycl_shims::queue
