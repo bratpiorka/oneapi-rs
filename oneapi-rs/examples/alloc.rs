@@ -12,7 +12,7 @@ fn main() {
     let mut queue = Queue::new();
     let mut buffer = queue.alloc_shared::<u32>(10).wait();
 
-    for e in buffer.iter() { 
+    for e in buffer.iter() {
         print!("{e} ")
     }
 
@@ -22,7 +22,7 @@ fn main() {
         buffer[i] = i as u32;
     }
 
-    for e in buffer.iter() { 
+    for e in buffer.iter() {
         print!("{e} ")
     }
 

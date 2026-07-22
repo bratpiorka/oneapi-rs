@@ -6,8 +6,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use oneapi_rs::platform::Platform;
 use oneapi_rs::info;
+use oneapi_rs::platform::Platform;
 
 fn main() {
     for platform in Platform::get_platforms() {
@@ -18,7 +18,9 @@ fn main() {
             let device_version = device.get_info::<info::device::Version>();
             let platform_version = platform.get_info::<info::platform::Version>();
 
-            println!("[{device_type:?}] {platform_name}, {device_name} {device_version} [{platform_version}]");
+            println!(
+                "[{device_type:?}] {platform_name}, {device_name} {device_version} [{platform_version}]"
+            );
         }
     }
 }

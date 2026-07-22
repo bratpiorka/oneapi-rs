@@ -8,8 +8,8 @@
 
 use crate::queue::Queue;
 
+use allocator_api2::alloc::{AllocError, Allocator};
 use oneapi_rs_sys::usm::ffi;
-use allocator_api2::alloc::{Allocator, AllocError};
 
 use std::{alloc::Layout, marker::PhantomData, ptr::NonNull};
 
@@ -18,11 +18,11 @@ type CxxResult<T> = cxx::core::result::Result<T, cxx::Exception>;
 /// An instance of a USM allocator.
 pub struct UsmAllocator<T: UsmAllocatorKind> {
     queue: Queue,
-    _kind: PhantomData<T>
+    _kind: PhantomData<T>,
 }
 
 /// A marker trait for USM allocators.
-pub unsafe trait UsmAlloc : Allocator {}
+pub unsafe trait UsmAlloc: Allocator {}
 
 unsafe impl<T: UsmAllocatorKind> UsmAlloc for UsmAllocator<T> {}
 
@@ -34,7 +34,7 @@ impl<T: UsmAllocatorKind> From<&Queue> for UsmAllocator<T> {
     fn from(queue: &Queue) -> Self {
         Self {
             queue: queue.clone(),
-            _kind: PhantomData
+            _kind: PhantomData,
         }
     }
 }
@@ -51,7 +51,9 @@ unsafe impl<T: UsmAllocatorKind> Allocator for UsmAllocator<T> {
     }
 
     unsafe fn deallocate(&self, ptr: NonNull<u8>, _layout: Layout) {
-        unsafe { ffi::free(ptr.as_ptr(), &self.queue.0); }
+        unsafe {
+            ffi::free(ptr.as_ptr(), &self.queue.0);
+        }
     }
 }
 

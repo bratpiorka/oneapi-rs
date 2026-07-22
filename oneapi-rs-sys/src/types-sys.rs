@@ -6,20 +6,20 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use std::sync::atomic::{Ordering::Relaxed, AtomicBool};
+use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 
 use futures::task::AtomicWaker;
 
 pub struct SharedWaker {
     pub waker: AtomicWaker,
-    pub done: AtomicBool
+    pub done: AtomicBool,
 }
 
 impl SharedWaker {
     pub fn new() -> Self {
         Self {
             waker: AtomicWaker::new(),
-            done: AtomicBool::new(false)
+            done: AtomicBool::new(false),
         }
     }
 
@@ -44,15 +44,15 @@ pub mod ffi {
     // https://github.com/dtolnay/cxx/issues/774#issuecomment-808674945
     // We must use pointer wrapper structs instead.
     struct DevicePtr {
-        ptr: UniquePtr<Device>
+        ptr: UniquePtr<Device>,
     }
 
     struct PlatformPtr {
-        ptr: UniquePtr<Platform>
+        ptr: UniquePtr<Platform>,
     }
-    
+
     struct EventPtr {
-        ptr: UniquePtr<Event>
+        ptr: UniquePtr<Event>,
     }
 
     #[derive(Debug)]
@@ -63,7 +63,7 @@ pub mod ffi {
         Custom,
         Automatic,
         All,
-        Unimplemented
+        Unimplemented,
     }
 
     #[derive(Debug)]
@@ -71,7 +71,7 @@ pub mod ffi {
         Submitted,
         Running,
         Complete,
-        Unknown
+        Unknown,
     }
 
     impl UniquePtr<Device> {}
