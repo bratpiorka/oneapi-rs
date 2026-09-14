@@ -1,0 +1,74 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: "0 15 * * 0" # Every Sunday at 15:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: "Analyze (${{ matrix.language }})"
+    runs-on: ["oneapi-rs", "Linux"]
+
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: c-cpp
+            build-mode: manual
+          - language: rust
+            build-mode: none
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+    - name: Check if oneAPI is already installed
+      id: check-oneapi
+      run: |
+        if [ -f /home/test-user/intel/oneapi/setvars.sh ]; then
+          echo "installed=true" >> $GITHUB_OUTPUT
+          source /home/test-user/intel/oneapi/setvars.sh
+          printenv | grep -E '^(PATH|LD_LIBRARY_PATH|LIBRARY_PATH|CPATH|C_INCLUDE_PATH|CPLUS_INCLUDE_PATH)=' >> $GITHUB_ENV
+        else
+          echo "installed=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Setup oneAPI
+      if: steps.check-oneapi.outputs.installed != 'true'
+      run: |
+        installer="intel-oneapi-toolkit-2026.1.0.192_offline.sh"
+        checksum="9d969de9cafbb698bf50f088c4b5174b50fc816f504049e685d6f6d198e10dbc17ef2cd4cfb0bc2b3d2179644a8d77d1"
+        curl --fail --location --retry 3 --silent --show-error --output "$installer" \
+          "https://registrationcenter-download.intel.com/akdlm/IRC_NAS/33cb2a22-ddf1-4aa9-8d68-1f5a118acaf2/intel-oneapi-toolkit-2026.1.0.192_offline.sh"
+        echo "$checksum  $installer" | sha384sum --check
+        sh "./$installer" -a --silent --cli --eula accept
+
+        source /home/test-user/intel/oneapi/setvars.sh
+        printenv | grep -E '^(PATH|LD_LIBRARY_PATH|LIBRARY_PATH|CPATH|C_INCLUDE_PATH|CPLUS_INCLUDE_PATH)=' >> $GITHUB_ENV
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+
+    - name: Build
+      run: cargo build --verbose
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+      with:
+        category: "/language:${{ matrix.language }}"

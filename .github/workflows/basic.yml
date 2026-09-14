@@ -66,6 +66,9 @@ jobs:
         git ls-files -z -- ':(glob)**/*.cpp' ':(glob)**/*.hpp' ':(glob)**/*.h' \
           | xargs -0 --no-run-if-empty clang-format --dry-run --Werror
 
+    - name: Run Clippy
+      run: cargo clippy --workspace --all-targets -- -D warnings
+
     - name: Build
       run: cargo build --verbose
 
@@ -101,6 +104,34 @@ jobs:
       with:
         name: documentation
         path: target/doc
+
+  trivy:
+    name: Trivy scan
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+    - name: Scan repository with Trivy
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+      with:
+        scan-type: fs
+        scan-ref: .
+        scanners: vuln,secret,misconfig
+        format: sarif
+        output: trivy-results.sarif
+        exit-code: 1
+
+    - name: Upload Trivy results to GitHub Security
+      if: always()
+      uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+      with:
+        sarif_file: trivy-results.sarif
+        category: trivy
 
   deploy-documentation:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.deploy_documentation == 'true')
