@@ -42,7 +42,7 @@ fn main() -> sycl_rs::Result<()> {
             NdRange::new([1024], [16]),
             &kernel,
             IotaArgs {
-                start: 3.14_f32,
+                start: std::f32::consts::PI,
                 ptr: &mut array,
             },
         )

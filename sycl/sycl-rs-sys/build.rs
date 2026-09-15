@@ -54,7 +54,7 @@ fn main() {
         "include/kernel-bundle.hpp",
     ];
 
-    cxx_build::bridges(&rust_sources)
+    cxx_build::bridges(rust_sources)
         .compiler(&compiler_path)
         .flag("-fsycl")
         .files(&cpp_sources)

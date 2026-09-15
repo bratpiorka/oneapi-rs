@@ -6,6 +6,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
+// WA for Clippy issue https://github.com/rust-lang/rust-clippy/issues/16317
+#[allow(clippy::missing_safety_doc)]
 #[cxx::bridge(namespace = "sycl_shims::queue")]
 pub mod ffi {
     #[namespace = "sycl_shims"]
@@ -44,6 +46,10 @@ pub mod ffi {
 
         fn clone(queue: &Queue) -> UniquePtr<Queue>;
 
+        /// # Safety
+        ///
+        /// `ptr` must be valid for writes of `num_bytes` bytes and remain valid until the
+        /// returned event completes. The memory must not be accessed concurrently.
         unsafe fn memset(
             queue: &mut UniquePtr<Queue>,
             ptr: *mut u8,
@@ -52,6 +58,11 @@ pub mod ffi {
             dep_events: Vec<EventPtr>,
         ) -> Result<UniquePtr<Event>>;
 
+        /// # Safety
+        ///
+        /// `src` and `dest` must be valid for reads and writes, respectively, of `num_bytes`
+        /// bytes and remain valid until the returned event completes. The regions must not
+        /// overlap or be accessed concurrently.
         unsafe fn memcpy(
             queue: &mut UniquePtr<Queue>,
             dest: *mut u8,
@@ -67,6 +78,10 @@ pub mod ffi {
 
         fn wait(queue: &mut UniquePtr<Queue>) -> Result<()>;
 
+        /// # Safety
+        ///
+        /// Each entry in `args` must match the corresponding kernel parameter's size, layout,
+        /// and alignment.
         unsafe fn launch_1d(
             queue: &mut UniquePtr<Queue>,
             global_size: Range1,
@@ -75,6 +90,10 @@ pub mod ffi {
             args: &[&[u8]],
         ) -> Result<UniquePtr<Event>>;
 
+        /// # Safety
+        ///
+        /// Each entry in `args` must match the corresponding kernel parameter's size, layout,
+        /// and alignment.
         unsafe fn launch_2d(
             queue: &mut UniquePtr<Queue>,
             global_size: Range2,
@@ -83,6 +102,10 @@ pub mod ffi {
             args: &[&[u8]],
         ) -> Result<UniquePtr<Event>>;
 
+        /// # Safety
+        ///
+        /// Each entry in `args` must match the corresponding kernel parameter's size, layout,
+        /// and alignment.
         unsafe fn launch_3d(
             queue: &mut UniquePtr<Queue>,
             global_size: Range3,

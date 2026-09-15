@@ -10,6 +10,8 @@ use std::sync::{Arc, atomic::Ordering::Relaxed};
 
 use crate::types::SharedWaker;
 
+// WA for Clippy issue https://github.com/rust-lang/rust-clippy/issues/16317
+#[allow(clippy::missing_safety_doc)]
 #[cxx::bridge(namespace = "sycl_shims::event")]
 pub mod ffi {
     #[namespace = "sycl_shims"]
@@ -29,6 +31,10 @@ pub mod ffi {
 
         fn wait(event: &mut UniquePtr<Event>) -> Result<()>;
 
+        /// # Safety
+        ///
+        /// `waker` must come from `Arc::into_raw` and transfer one strong reference to the
+        /// callback, which will consume it after the event completes.
         unsafe fn register_callback(
             queue: &mut UniquePtr<Queue>,
             event: &Event,
@@ -41,12 +47,18 @@ pub mod ffi {
 
     extern "Rust" {
         type SharedWaker;
+        /// # Safety
+        ///
+        /// `ptr` must come from `Arc::into_raw` and represent a strong reference owned by this
+        /// callback.
         unsafe fn wake(ptr: *const SharedWaker);
     }
 }
 
-// Safety: SharedWaker must by a pointer created by Arc::into_raw. The caller must increment the
-// SharedWaker's strong reference count before calling.
+/// # Safety
+///
+/// SharedWaker must be a pointer created by Arc::into_raw. The caller must increment the
+/// SharedWaker's strong reference count before calling.
 unsafe fn wake(ptr: *const SharedWaker) {
     unsafe {
         (*ptr).done.store(true, Relaxed);
