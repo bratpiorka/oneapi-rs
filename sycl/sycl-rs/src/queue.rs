@@ -28,6 +28,8 @@ use crate::{
 /// a kernel.
 pub struct Queue(pub(crate) cxx::UniquePtr<ffi::Queue>);
 
+// We intentionally do not implement Default for Queue as it could not always select the desired device.
+#[allow(clippy::new_without_default)]
 impl Queue {
     /// Construct a `Queue` based on the device returned from the default selector.
     pub fn new() -> Self {
@@ -77,28 +79,40 @@ impl Queue {
     }
 
     /// Allocates memory and creates a host-side [`UsmBox`] that can store an array of T.
-    /// Safety: the array contents are uninitialized.
+    ///
+    /// # Safety
+    ///
+    /// The array contents are uninitialized and must not be read before they are initialized.
     pub unsafe fn alloc_uninit_host<T>(&self, len: usize) -> HostUsmBox<T> {
         let allocator = UsmAllocator::from(self);
         unsafe { UsmBox::new(allocator, len) }
     }
 
     /// Allocates memory and creates a shared [`UsmBox`] that can store an array of T.
-    /// Safety: the array contents are uninitialized.
+    ///
+    /// # Safety
+    ///
+    /// The array contents are uninitialized and must not be read before they are initialized.
     pub unsafe fn alloc_uninit_shared<T>(&self, len: usize) -> SharedUsmBox<T> {
         let allocator = UsmAllocator::from(self);
         unsafe { UsmBox::new(allocator, len) }
     }
 
     /// Allocates memory and creates a device-side [`UsmBox`] that can store an array of T.
-    /// Safety: the array contents are uninitialized.
+    ///
+    /// # Safety
+    ///
+    /// The array contents are uninitialized and must not be read before they are initialized.
     pub unsafe fn alloc_uninit_device<T>(&self, len: usize) -> DeviceUsmBox<T> {
         let allocator = UsmAllocator::from(self);
         unsafe { UsmBox::new(allocator, len) }
     }
 
     /// Sets memory allocated with USM allocations.
-    /// Safety: the caller must make sure the underlying memory isn't being aliased somewhere else.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure the underlying memory is not aliased elsewhere.
     pub unsafe fn memset<T, A: UsmAlloc>(
         &mut self,
         array: &mut UsmBox<T, A>,
@@ -108,7 +122,10 @@ impl Queue {
     }
 
     /// Sets memory allocated with USM allocations after all specified events finish.
-    /// Safety: the caller must make sure the underlying memory isn't being aliased somewhere else.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure the underlying memory is not aliased elsewhere.
     pub unsafe fn memset_with_deps<T, A: UsmAlloc>(
         &mut self,
         array: &mut UsmBox<T, A>,
@@ -128,7 +145,7 @@ impl Queue {
 
     /// Submits a barrier to the queue.
     pub fn barrier(&mut self) -> Result<Event> {
-        self.barrier_with_deps(&[]).map(Into::into)
+        self.barrier_with_deps(&[])
     }
 
     /// Submits a barrier to the queue after all specified events finish.
@@ -153,7 +170,9 @@ impl Queue {
     /// Enqueues a kernel object to the queue as an ND-range kernel, using the number of work-items
     /// specified by the [`NdRange`] nd_range.
     ///
-    /// Safety: The caller must make sure each argument matches the launched SYCL kernel's
+    /// # Safety
+    ///
+    /// The caller must make sure each argument matches the launched SYCL kernel's
     /// signature, including their respective size, layout and alignment.
     pub unsafe fn launch<const ARGC: usize, const DIMENSIONS: usize>(
         &mut self,

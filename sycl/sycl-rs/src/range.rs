@@ -42,6 +42,10 @@ impl<const DIMENSIONS: usize> NdRange<DIMENSIONS> {
 
 /// [`NdRange`] types which are limited to 1, 2 or 3 dimensions.
 pub trait ValidDimension: Sealed {
+    /// # Safety
+    ///
+    /// Each argument must match the launched SYCL kernel's signature, including its size,
+    /// layout, and alignment.
     unsafe fn launch<const ARGC: usize>(
         &self,
         queue: &mut Queue,

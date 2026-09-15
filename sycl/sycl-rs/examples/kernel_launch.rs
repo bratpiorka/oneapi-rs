@@ -37,7 +37,7 @@ async fn main() -> sycl_rs::Result<()> {
         queue.launch(
             NdRange::new([1024], [16]),
             &kernel,
-            (f16::from_f32(3.14), &mut device_array),
+            (f16::PI, &mut device_array),
         )
     }?
     .await?;

@@ -60,7 +60,7 @@ impl Future for EventFuture {
         let this = self.project();
 
         // Set the callback on first Future poll (Futures can't be active until polled)
-        if *this.set_callback == false {
+        if !*this.set_callback {
             *this.set_callback = true;
             let mut queue = Queue::new_immediate();
             this.shared.waker.register(cx.waker());
