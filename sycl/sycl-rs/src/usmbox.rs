@@ -51,7 +51,7 @@ impl<T, A: UsmAlloc> UsmBox<T, A> {
     /// Safety: returns uninitialized memory.
     pub(crate) unsafe fn new(allocator: A, len: usize) -> Self {
         let layout = Layout::array::<T>(len).unwrap();
-        let ptr = match allocator.allocate(layout.clone()) {
+        let ptr = match allocator.allocate(layout) {
             Ok(ptr) => ptr,
             _ => handle_alloc_error(layout),
         };

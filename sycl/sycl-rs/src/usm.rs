@@ -23,21 +23,28 @@ pub struct UsmAllocator<T: UsmAllocatorKind> {
 
 /// A marker trait for USM allocators.
 ///
-/// Safety: a type implementing this trait must be a valid USM allocator managed by a SYCL runtime.
+/// # Safety
+///
+/// A type implementing this trait must be a valid USM allocator managed by a SYCL runtime.
 pub unsafe trait UsmAlloc: Allocator {}
 
 unsafe impl<T: UsmAllocatorKind> UsmAlloc for UsmAllocator<T> {}
 
 pub trait UsmAllocatorKind {
     /// Allocates uninitialized memory.
-    /// Safety: the caller must not read uninitialized memory. The caller must also free this
+    ///
+    /// # Safety
+    ///
+    /// The caller must not read uninitialized memory. The caller must also free this
     /// memory manually.
     unsafe fn alloc(alignment: usize, num_bytes: usize, queue: &Queue) -> CxxResult<*mut u8>;
 }
 
 /// A marker trait for host-accessible USM allocators.
 ///
-/// Safety: a type implementing this trait must be a valid USM allocator managed by a SYCL runtime,
+/// # Safety
+///
+/// A type implementing this trait must be a valid USM allocator managed by a SYCL runtime,
 /// that allocates memory accessible from the host.
 pub unsafe trait HostAccessible {}
 

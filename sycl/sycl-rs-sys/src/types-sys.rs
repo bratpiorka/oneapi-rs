@@ -24,6 +24,12 @@ impl SharedWaker {
     }
 }
 
+impl Default for SharedWaker {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cxx::bridge(namespace = "sycl_shims")]
 pub mod ffi {
     unsafe extern "C++" {
@@ -58,7 +64,7 @@ pub mod ffi {
     enum Aspect {
         /// Indicates that the device supports the `PciBdfAddress` information descriptor.
         ExtIntelPciAddress,
-        /// Indicates that the implementation identifies this device as integrated GPU.
+        /// Indicates that the implementation identifies this device as an integrated GPU.
         ExtOneapiIsIntegratedGpu,
     }
 
