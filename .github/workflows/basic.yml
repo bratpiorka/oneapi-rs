@@ -58,8 +58,8 @@ jobs:
       run: |
         sycl-ls --verbose
 
-    #- name: Check formatting
-    #  run: cargo fmt --all -- --check
+    - name: Check formatting
+      run: cargo fmt --all -- --check
 
     - name: Check C++ formatting
       run: |
@@ -109,8 +109,25 @@ jobs:
     name: Trivy scan
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+    - name: Generate SPDX SBOM with Trivy
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+      with:
+        scan-type: fs
+        scan-ref: .
+        format: spdx-json
+        output: sbom.spdx.json
+
+    - name: Submit SPDX SBOM to GitHub dependency graph
+      if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+      uses: advanced-security/spdx-dependency-submission-action@b009efcf8b9d562a4569d2028c276522232e631f # v0.4.0
+      with:
+        filePath: sbom.spdx.json
 
     - name: Scan repository with Trivy
       uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
