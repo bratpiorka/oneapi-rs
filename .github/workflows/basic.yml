@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+  schedule:
+    - cron: "0 16 * * 0" # Every Sunday at 16:00 UTC
+
   workflow_dispatch:
     inputs:
       deploy_documentation:
@@ -23,6 +26,7 @@ permissions:
 
 jobs:
   build-and-test:
+    if: github.event_name != 'schedule'
     runs-on: ["oneapi-rs", "Linux"]
     
     steps:
@@ -111,6 +115,8 @@ jobs:
 
     permissions:
       contents: write
+      security-events: write
+      actions: read
 
     steps:
     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -135,7 +141,16 @@ jobs:
         scan-type: fs
         scan-ref: .
         scanners: vuln,secret,misconfig
-        exit-code: 1
+        format: sarif
+        output: trivy-results.sarif
+        exit-code: '1'
+
+    - name: Upload Trivy findings
+      if: ${{ always() && hashFiles('trivy-results.sarif') != '' }}
+      uses: github/codeql-action/upload-sarif@d8073367669608af8fbcc5f63dd0a0d52bb90cff # v4
+      with:
+        sarif_file: trivy-results.sarif
+        category: trivy
 
   deploy-documentation:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.deploy_documentation == 'true')
