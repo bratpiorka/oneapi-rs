@@ -16,6 +16,12 @@ fn criterion_benchmark(c: &mut Criterion) {
     memcpy_benchmark(c, 10).unwrap();
 }
 
+/// This benchmark measures the overhead resulting from performing multiple copy operations on small
+/// buffers.
+///
+/// It allocates 4<sup>test_count</sup> KB of memory and divides it into pairs of host-device buffers,
+/// starting from a single pair. Each iteration measures 100 h2d copies for each buffer pair. The
+/// number of pairs quadruples after each iteration.
 fn memcpy_benchmark(c: &mut Criterion, test_count: u32) -> sycl_rs::Result<()> {
     static KB: usize = 1024;
 
