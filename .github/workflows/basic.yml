@@ -129,6 +129,13 @@ jobs:
         format: spdx-json
         output: sbom.spdx.json
 
+    - name: Upload SPDX SBOM artifact
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: sbom-spdx
+        path: sbom.spdx.json
+        if-no-files-found: error
+
     - name: Submit SPDX SBOM to GitHub dependency graph
       if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
       uses: advanced-security/spdx-dependency-submission-action@b009efcf8b9d562a4569d2028c276522232e631f # v0.4.0
