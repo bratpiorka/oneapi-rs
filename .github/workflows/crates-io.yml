@@ -33,32 +33,13 @@ jobs:
 
     steps:
     - name: Checkout repository
-      if: matrix.install == 'vendored'
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
-    - name: Check if oneAPI is already installed
-      id: check-oneapi
-      run: |
-        if [ -f /home/test-user/intel/oneapi/setvars.sh ]; then
-          echo "installed=true" >> $GITHUB_OUTPUT
-          source /home/test-user/intel/oneapi/setvars.sh
-          printenv | grep -E '^(PATH|LD_LIBRARY_PATH|LIBRARY_PATH|CPATH|C_INCLUDE_PATH|CPLUS_INCLUDE_PATH)=' >> $GITHUB_ENV
-        else
-          echo "installed=false" >> $GITHUB_OUTPUT
-        fi
+      with:
+        # crates-io only needs the local setup action, not the sources under test.
+        sparse-checkout: ${{ matrix.install == 'crates-io' && '.github/actions' || '' }}
 
     - name: Setup oneAPI
-      if: steps.check-oneapi.outputs.installed != 'true'
-      run: |
-        installer="intel-oneapi-toolkit-2026.1.0.192_offline.sh"
-        checksum="9d969de9cafbb698bf50f088c4b5174b50fc816f504049e685d6f6d198e10dbc17ef2cd4cfb0bc2b3d2179644a8d77d1"
-        curl --fail --location --retry 3 --silent --show-error --output "$installer" \
-          "https://registrationcenter-download.intel.com/akdlm/IRC_NAS/33cb2a22-ddf1-4aa9-8d68-1f5a118acaf2/intel-oneapi-toolkit-2026.1.0.192_offline.sh"
-        echo "$checksum  $installer" | sha384sum --check
-        sh "./$installer" -a --silent --cli --eula accept
-
-        source /home/test-user/intel/oneapi/setvars.sh
-        printenv | grep -E '^(PATH|LD_LIBRARY_PATH|LIBRARY_PATH|CPATH|C_INCLUDE_PATH|CPLUS_INCLUDE_PATH)=' >> $GITHUB_ENV
+      uses: ./.github/actions/setup-oneapi
 
     - name: Create vendored source from current checkout
       if: matrix.install == 'vendored'
