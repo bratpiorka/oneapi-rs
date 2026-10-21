@@ -8,7 +8,7 @@
 
 use sycl_rs_sys::platform::ffi;
 
-use crate::{device::Device, info::InfoTarget, private::Sealed};
+use crate::{Result, device::Device, info::InfoTarget, private::Sealed};
 
 /// Abstraction for SYCL platform.
 ///
@@ -23,18 +23,18 @@ impl InfoTarget for Platform {}
 
 impl Platform {
     /// Returns a [`Vec`] containing all SYCL platforms from all SYCL backends available in the system.
-    pub fn get_platforms() -> Vec<Self> {
-        ffi::get_platforms()
+    pub fn get_platforms() -> Result<Vec<Self>> {
+        Ok(ffi::get_platforms()?
             .into_iter()
             .map(|platform| Self(platform.ptr))
-            .collect()
+            .collect())
     }
 
     /// Returns a [`Vec`] containing all the root devices associated with this `Platform`.
-    pub fn get_devices(&self) -> Vec<Device> {
-        ffi::get_devices(&self.0)
+    pub fn get_devices(&self) -> Result<Vec<Device>> {
+        Ok(ffi::get_devices(&self.0)?
             .into_iter()
             .map(|device| Device(device.ptr))
-            .collect()
+            .collect())
     }
 }

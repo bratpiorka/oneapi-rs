@@ -33,18 +33,18 @@ pub mod ffi {
         #[namespace = "sycl_shims"]
         type Kernel = crate::types::ffi::Kernel;
 
-        fn new_queue() -> UniquePtr<Queue>;
-        fn new_queue_immediate() -> UniquePtr<Queue>;
-        fn new_queue_from_device(device: &Device) -> UniquePtr<Queue>;
+        fn new_queue() -> Result<UniquePtr<Queue>>;
+        fn new_queue_immediate() -> Result<UniquePtr<Queue>>;
+        fn new_queue_from_device(device: &Device) -> Result<UniquePtr<Queue>>;
         fn new_queue_from_context_and_device(
             context: &Context,
             device: &Device,
-        ) -> UniquePtr<Queue>;
+        ) -> Result<UniquePtr<Queue>>;
 
-        fn get_context(queue: &Queue) -> UniquePtr<Context>;
-        fn get_device(queue: &Queue) -> UniquePtr<Device>;
+        fn get_context(queue: &Queue) -> Result<UniquePtr<Context>>;
+        fn get_device(queue: &Queue) -> Result<UniquePtr<Device>>;
 
-        fn clone(queue: &Queue) -> UniquePtr<Queue>;
+        fn clone(queue: &Queue) -> Result<UniquePtr<Queue>>;
 
         /// # Safety
         ///

@@ -41,8 +41,8 @@ pub mod ffi {
             waker: *const SharedWaker,
         ) -> Result<()>;
 
-        fn get_command_execution_status(event: &Event) -> EventCommandStatus;
-        fn clone(event: &Event) -> UniquePtr<Event>;
+        fn get_command_execution_status(event: &Event) -> Result<EventCommandStatus>;
+        fn clone(event: &Event) -> Result<UniquePtr<Event>>;
     }
 
     extern "Rust" {

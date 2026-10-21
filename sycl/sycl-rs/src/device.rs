@@ -29,17 +29,16 @@ impl From<cxx::UniquePtr<ffi::Device>> for Device {
 impl Device {
     /// Returns a [`Vec`] containing all the root devices from all SYCL backends
     /// available in the system which have the device type encapsulated by [`DeviceType`](crate::info::DeviceType).
-    pub fn get_devices() -> Vec<Self> {
-        ffi::get_devices()
+    pub fn get_devices() -> Result<Vec<Self>> {
+        Ok(ffi::get_devices()?
             .into_iter()
             .map(|device| Self(device.ptr))
-            .collect()
+            .collect())
     }
 
     /// Returns the associated SYCL platform.
-    pub fn get_platform(&self) -> Platform {
-        let raw_platform = ffi::get_platform(&self.0);
-        Platform(raw_platform)
+    pub fn get_platform(&self) -> Result<Platform> {
+        Ok(Platform(ffi::get_platform(&self.0)?))
     }
 
     /// Returns whether this device has the requested aspect.
@@ -56,8 +55,8 @@ impl Device {
     /// [`PeerAccess::AtomicsSupported`]: When this query returns true, it indicates that this
     /// device may concurrently access and atomically modify USM device memory allocations located
     /// on the peer device when peer access is enabled to that device.
-    pub fn can_access_peer(&mut self, peer: &Device, value: PeerAccess) -> bool {
-        ffi::can_access_peer(&mut self.0, &peer.0, value)
+    pub fn can_access_peer(&mut self, peer: &Device, value: PeerAccess) -> Result<bool> {
+        ffi::can_access_peer(&mut self.0, &peer.0, value).map_err(Into::into)
     }
 
     /// Enables this device to access USM device allocations located on the peer device.
@@ -67,17 +66,19 @@ impl Device {
     /// access USM device allocations on the peer device subject to the normal rules about context
     /// as described in the core SYCL specification.
     pub fn enable_peer_access(&mut self, peer: &Device) -> Result<()> {
-        ffi::enable_peer_access(&mut self.0, &peer.0)
+        ffi::enable_peer_access(&mut self.0, &peer.0).map_err(Into::into)
     }
 
     /// Disables access to the peer device’s memory from this device.
     pub fn disable_peer_access(&mut self, peer: &Device) -> Result<()> {
-        ffi::disable_peer_access(&mut self.0, &peer.0)
+        ffi::disable_peer_access(&mut self.0, &peer.0).map_err(Into::into)
     }
 }
 
 impl Clone for Device {
     fn clone(&self) -> Self {
-        ffi::clone(&self.0).into()
+        ffi::clone(&self.0)
+            .expect("failed to clone SYCL device")
+            .into()
     }
 }

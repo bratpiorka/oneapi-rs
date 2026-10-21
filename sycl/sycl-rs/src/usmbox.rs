@@ -48,20 +48,21 @@ pub struct UsmBox<T, A: UsmAlloc> {
 
 impl<T, A: UsmAlloc> UsmBox<T, A> {
     /// Creates a new array given an allocator.
+    /// Allocation failures invoke [`handle_alloc_error`]; invalid layouts return an error.
     /// Safety: returns uninitialized memory.
-    pub(crate) unsafe fn new(allocator: A, len: usize) -> Self {
-        let layout = Layout::array::<T>(len).unwrap();
+    pub(crate) unsafe fn new(allocator: A, len: usize) -> Result<Self> {
+        let layout = Layout::array::<T>(len)?;
         let ptr = match allocator.allocate(layout) {
             Ok(ptr) => ptr,
-            _ => handle_alloc_error(layout),
+            Err(_) => handle_alloc_error(layout),
         };
 
-        Self {
+        Ok(Self {
             data: ptr.cast(),
             len,
             layout,
             allocator,
-        }
+        })
     }
 
     pub(crate) fn get_byte_ptr(&self) -> *mut u8 {
@@ -98,9 +99,7 @@ impl<T, A: UsmAlloc + HostAccessible> DerefMut for UsmBox<T, A> {
 
 impl<T, A: UsmAlloc> Drop for UsmBox<T, A> {
     fn drop(&mut self) {
-        unsafe {
-            self.allocator.deallocate(self.data.cast(), self.layout);
-        }
+        unsafe { self.allocator.deallocate(self.data.cast(), self.layout) };
     }
 }
 

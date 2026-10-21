@@ -24,11 +24,11 @@ void iota(sycl::half start, sycl::half *ptr) {
 
 #[tokio::main]
 async fn main() -> sycl_rs::Result<()> {
-    let mut queue = Queue::new();
+    let mut queue = Queue::new()?;
     let mut device_array = queue.alloc_device::<f16>(1024)?.await?;
 
     let kernel = queue
-        .get_context()
+        .get_context()?
         .create_kernel_bundle_from_source(IOTA_SRC)?
         .build()?
         .get_kernel("iota")?;

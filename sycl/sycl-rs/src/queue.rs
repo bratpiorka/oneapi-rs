@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use crate::Result;
+use crate::{Result, SyclError};
 use bytemuck::Pod;
 use sycl_rs_sys::{queue::ffi, types::ffi::EventPtr};
 
@@ -32,29 +32,29 @@ pub struct Queue(pub(crate) cxx::UniquePtr<ffi::Queue>);
 #[allow(clippy::new_without_default)]
 impl Queue {
     /// Construct a `Queue` based on the device returned from the default selector.
-    pub fn new() -> Self {
-        Self(ffi::new_queue())
+    pub fn new() -> Result<Self> {
+        Ok(Self(ffi::new_queue()?))
     }
 
     /// Construct an immediate `Queue` based on the device returned from the default selector.
-    pub fn new_immediate() -> Self {
-        Self(ffi::new_queue_immediate())
+    pub fn new_immediate() -> Result<Self> {
+        Ok(Self(ffi::new_queue_immediate()?))
     }
 
     /// Returns the SYCL queue’s context.
-    pub fn get_context(&self) -> Context {
-        ffi::get_context(&self.0).into()
+    pub fn get_context(&self) -> Result<Context> {
+        Ok(ffi::get_context(&self.0)?.into())
     }
 
     /// Returns the device the queue is associated with.
-    pub fn get_device(&self) -> Device {
-        ffi::get_device(&self.0).into()
+    pub fn get_device(&self) -> Result<Device> {
+        Ok(ffi::get_device(&self.0)?.into())
     }
 
     /// Allocates zeroed memory and creates a host-side [`UsmBox`] that can store an array of T.
     pub fn alloc_host<T: Pod>(&mut self, len: usize) -> Result<EnqueuedHostUsmBox<T>> {
         unsafe {
-            let mut array = self.alloc_uninit_host(len);
+            let mut array = self.alloc_uninit_host(len)?;
             self.memset(&mut array, 0)
                 .map(|event| EnqueuedUsmBox::new(array, event))
         }
@@ -63,7 +63,7 @@ impl Queue {
     /// Allocates zeroed memory and creates a shared [`UsmBox`] that can store an array of T.
     pub fn alloc_shared<T: Pod>(&mut self, len: usize) -> Result<EnqueuedSharedUsmBox<T>> {
         unsafe {
-            let mut array = self.alloc_uninit_shared(len);
+            let mut array = self.alloc_uninit_shared(len)?;
             self.memset(&mut array, 0)
                 .map(|event| EnqueuedUsmBox::new(array, event))
         }
@@ -72,7 +72,7 @@ impl Queue {
     /// Allocates zeroed memory and creates a device [`UsmBox`] that can store an array of T.
     pub fn alloc_device<T: Pod>(&mut self, len: usize) -> Result<EnqueuedDeviceUsmBox<T>> {
         unsafe {
-            let mut array = self.alloc_uninit_device(len);
+            let mut array = self.alloc_uninit_device(len)?;
             self.memset(&mut array, 0)
                 .map(|event| EnqueuedUsmBox::new(array, event))
         }
@@ -83,8 +83,8 @@ impl Queue {
     /// # Safety
     ///
     /// The array contents are uninitialized and must not be read before they are initialized.
-    pub unsafe fn alloc_uninit_host<T>(&self, len: usize) -> HostUsmBox<T> {
-        let allocator = UsmAllocator::from(self);
+    pub unsafe fn alloc_uninit_host<T>(&self, len: usize) -> Result<HostUsmBox<T>> {
+        let allocator = UsmAllocator::try_from(self)?;
         unsafe { UsmBox::new(allocator, len) }
     }
 
@@ -93,8 +93,8 @@ impl Queue {
     /// # Safety
     ///
     /// The array contents are uninitialized and must not be read before they are initialized.
-    pub unsafe fn alloc_uninit_shared<T>(&self, len: usize) -> SharedUsmBox<T> {
-        let allocator = UsmAllocator::from(self);
+    pub unsafe fn alloc_uninit_shared<T>(&self, len: usize) -> Result<SharedUsmBox<T>> {
+        let allocator = UsmAllocator::try_from(self)?;
         unsafe { UsmBox::new(allocator, len) }
     }
 
@@ -103,8 +103,8 @@ impl Queue {
     /// # Safety
     ///
     /// The array contents are uninitialized and must not be read before they are initialized.
-    pub unsafe fn alloc_uninit_device<T>(&self, len: usize) -> DeviceUsmBox<T> {
-        let allocator = UsmAllocator::from(self);
+    pub unsafe fn alloc_uninit_device<T>(&self, len: usize) -> Result<DeviceUsmBox<T>> {
+        let allocator = UsmAllocator::try_from(self)?;
         unsafe { UsmBox::new(allocator, len) }
     }
 
@@ -136,11 +136,13 @@ impl Queue {
         let num_bytes = array.get_byte_size();
         let dep_events = dep_events
             .iter()
-            .map(|e| EventPtr {
-                ptr: (*e).clone().0,
+            .map(|e| {
+                Ok(EventPtr {
+                    ptr: sycl_rs_sys::event::ffi::clone(&e.0)?,
+                })
             })
-            .collect::<Vec<_>>();
-        unsafe { ffi::memset(&mut self.0, ptr, value, num_bytes, dep_events) }.map(Into::into)
+            .collect::<Result<Vec<_>>>()?;
+        Ok(unsafe { ffi::memset(&mut self.0, ptr, value, num_bytes, dep_events)? }.into())
     }
 
     /// Submits a barrier to the queue.
@@ -152,11 +154,13 @@ impl Queue {
     pub fn barrier_with_deps(&mut self, dep_events: &[&Event]) -> Result<Event> {
         let dep_events = dep_events
             .iter()
-            .map(|e| EventPtr {
-                ptr: (*e).clone().0,
+            .map(|e| {
+                Ok(EventPtr {
+                    ptr: sycl_rs_sys::event::ffi::clone(&e.0)?,
+                })
             })
-            .collect::<Vec<_>>();
-        ffi::barrier(&mut self.0, dep_events).map(Into::into)
+            .collect::<Result<Vec<_>>>()?;
+        Ok(ffi::barrier(&mut self.0, dep_events)?.into())
     }
 
     /// Performs a blocking wait for the completion of all enqueued tasks in the queue. Returns an
@@ -164,7 +168,7 @@ impl Queue {
     ///
     /// Dropping the queue does not wait for its completion.
     pub fn wait(&mut self) -> Result<()> {
-        ffi::wait(&mut self.0)
+        ffi::wait(&mut self.0).map_err(Into::into)
     }
 
     /// Enqueues a kernel object to the queue as an ND-range kernel, using the number of work-items
@@ -222,10 +226,12 @@ impl Queue {
         // TODO: Resolve the C++ lifetime elision issue
         let dep_events = dep_events
             .iter()
-            .map(|e| EventPtr {
-                ptr: (*e).clone().0,
+            .map(|e| {
+                Ok(EventPtr {
+                    ptr: sycl_rs_sys::event::ffi::clone(&e.0)?,
+                })
             })
-            .collect::<Vec<_>>();
+            .collect::<Result<Vec<_>>>()?;
 
         let num_bytes = src.get_len() * size_of::<T>();
         unsafe {
@@ -238,20 +244,25 @@ impl Queue {
             )
         }
         .map(Into::into)
+        .map_err(Into::into)
     }
 }
 
-impl From<&Device> for Queue {
-    fn from(value: &Device) -> Self {
-        Self(ffi::new_queue_from_device(&value.0))
+impl TryFrom<&Device> for Queue {
+    type Error = SyclError;
+
+    fn try_from(value: &Device) -> Result<Self> {
+        Ok(Self(ffi::new_queue_from_device(&value.0)?))
     }
 }
 
-impl From<(&Context, &Device)> for Queue {
-    fn from(value: (&Context, &Device)) -> Self {
-        Self(ffi::new_queue_from_context_and_device(
+impl TryFrom<(&Context, &Device)> for Queue {
+    type Error = SyclError;
+
+    fn try_from(value: (&Context, &Device)) -> Result<Self> {
+        Ok(Self(ffi::new_queue_from_context_and_device(
             &value.0.0, &value.1.0,
-        ))
+        )?))
     }
 }
 
@@ -263,6 +274,8 @@ impl From<cxx::UniquePtr<ffi::Queue>> for Queue {
 
 impl Clone for Queue {
     fn clone(&self) -> Self {
-        ffi::clone(&self.0).into()
+        ffi::clone(&self.0)
+            .expect("failed to clone SYCL queue")
+            .into()
     }
 }

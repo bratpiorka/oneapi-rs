@@ -28,11 +28,11 @@ struct IotaArgs<'a> {
 }
 
 fn main() -> sycl_rs::Result<()> {
-    let mut queue = Queue::new();
+    let mut queue = Queue::new()?;
     let mut array = queue.alloc_shared::<f32>(1024)?.wait()?;
 
     let kernel = queue
-        .get_context()
+        .get_context()?
         .create_kernel_bundle_from_source(IOTA_SRC)?
         .build()?
         .get_kernel("iota")?;

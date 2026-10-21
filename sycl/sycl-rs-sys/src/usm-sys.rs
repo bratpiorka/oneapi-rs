@@ -48,6 +48,6 @@ pub mod ffi {
         ///
         /// `ptr` must be a live USM allocation associated with `queue` and must not be used after
         /// this call.
-        unsafe fn free(ptr: *mut u8, queue: &Queue);
+        unsafe fn free(ptr: *mut u8, queue: &Queue) -> Result<()>;
     }
 }

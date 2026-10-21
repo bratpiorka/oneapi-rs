@@ -21,7 +21,7 @@ impl From<cxx::UniquePtr<types::ffi::SourceKernelBundle>> for SourceKernelBundle
 
 impl SourceKernelBundle {
     pub fn build(&mut self) -> Result<ExecutableKernelBundle> {
-        ffi::build(&mut self.0).map(Into::into)
+        Ok(ffi::build(&mut self.0)?.into())
     }
 }
 
@@ -36,7 +36,7 @@ impl From<cxx::UniquePtr<types::ffi::ExecutableKernelBundle>> for ExecutableKern
 
 impl ExecutableKernelBundle {
     pub fn get_kernel(&mut self, name: &str) -> Result<Kernel> {
-        ffi::get_kernel(&mut self.0, name).map(Into::into)
+        Ok(ffi::get_kernel(&mut self.0, name)?.into())
     }
 }
 

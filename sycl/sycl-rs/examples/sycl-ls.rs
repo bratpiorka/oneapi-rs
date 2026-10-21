@@ -8,9 +8,9 @@
 
 use sycl_rs::prelude::*;
 
-fn main() {
-    for platform in Platform::get_platforms() {
-        for device in platform.get_devices() {
+fn main() -> sycl_rs::Result<()> {
+    for platform in Platform::get_platforms()? {
+        for device in platform.get_devices()? {
             let device_type = device.get_info::<info::device::DeviceType>();
             let platform_name = platform.get_info::<info::platform::Name>();
             let device_name = device.get_info::<info::device::Name>();
@@ -35,4 +35,5 @@ fn main() {
             );
         }
     }
+    Ok(())
 }

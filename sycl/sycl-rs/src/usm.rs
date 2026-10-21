@@ -6,12 +6,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use crate::queue::Queue;
+use crate::{SyclError, queue::Queue};
 
 use allocator_api2::alloc::{AllocError, Allocator};
 use sycl_rs_sys::usm::ffi;
 
-use std::{alloc::Layout, marker::PhantomData, ptr::NonNull};
+use std::{alloc::Layout, io::Write, marker::PhantomData, ptr::NonNull};
 
 type CxxResult<T> = cxx::core::result::Result<T, cxx::Exception>;
 
@@ -48,29 +48,32 @@ pub trait UsmAllocatorKind {
 /// that allocates memory accessible from the host.
 pub unsafe trait HostAccessible {}
 
-impl<T: UsmAllocatorKind> From<&Queue> for UsmAllocator<T> {
-    fn from(queue: &Queue) -> Self {
-        Self {
-            queue: queue.clone(),
+impl<T: UsmAllocatorKind> TryFrom<&Queue> for UsmAllocator<T> {
+    type Error = SyclError;
+
+    fn try_from(queue: &Queue) -> crate::Result<Self> {
+        Ok(Self {
+            queue: sycl_rs_sys::queue::ffi::clone(&queue.0)?.into(),
             _kind: PhantomData,
-        }
+        })
     }
 }
 
 unsafe impl<T: UsmAllocatorKind> Allocator for UsmAllocator<T> {
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         let ptr = unsafe { T::alloc(layout.align(), layout.size(), &self.queue) }
-            .map_err(|_e| AllocError)?;
-
+            .map_err(|_| AllocError)?;
         let ptr = NonNull::new(ptr).ok_or(AllocError)?;
-        let slice = NonNull::slice_from_raw_parts(ptr, layout.size());
-
-        Ok(slice)
+        Ok(NonNull::slice_from_raw_parts(ptr, layout.size()))
     }
 
     unsafe fn deallocate(&self, ptr: NonNull<u8>, _layout: Layout) {
-        unsafe {
-            ffi::free(ptr.as_ptr(), &self.queue.0);
+        if let Err(error) = unsafe { ffi::free(ptr.as_ptr(), &self.queue.0) } {
+            // A failed stderr write must not cause a second panic during unwinding.
+            let _ = writeln!(
+                std::io::stderr().lock(),
+                "sycl-rs: USM deallocation failed: {error}"
+            );
         }
     }
 }

@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
+use crate::Result;
 use crate::event::Event;
 use crate::info::Info;
 use crate::private::Sealed;
@@ -15,9 +16,9 @@ use sycl_rs_sys::event::ffi;
 pub struct CommandExecutionStatus;
 impl Sealed for CommandExecutionStatus {}
 impl Info for CommandExecutionStatus {
-    type Item = crate::info::EventCommandStatus;
+    type Item = Result<crate::info::EventCommandStatus>;
     type Target = Event;
     fn get_item(target: &Self::Target) -> Self::Item {
-        ffi::get_command_execution_status(&target.0)
+        ffi::get_command_execution_status(&target.0).map_err(Into::into)
     }
 }

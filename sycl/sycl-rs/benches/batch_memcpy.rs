@@ -35,13 +35,13 @@ fn memcpy_benchmark(c: &mut Criterion, test_count: u32) -> sycl_rs::Result<()> {
         let buf_size = used_memory / buf_count;
         let copy_count = buf_count / 2;
 
-        let mut queue = Queue::new();
+        let mut queue = Queue::new()?;
         let mut host_buffers = Vec::<HostUsmBox<u32>>::new();
         let mut device_buffers = Vec::<DeviceUsmBox<u32>>::new();
 
         for _ in 1..copy_count {
-            let host_buffer = unsafe { queue.alloc_uninit_host::<u32>(buf_size) };
-            let device_buffer = unsafe { queue.alloc_uninit_device::<u32>(buf_size) };
+            let host_buffer = unsafe { queue.alloc_uninit_host::<u32>(buf_size)? };
+            let device_buffer = unsafe { queue.alloc_uninit_device::<u32>(buf_size)? };
 
             host_buffers.push(host_buffer);
             device_buffers.push(device_buffer);

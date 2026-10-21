@@ -76,6 +76,7 @@ impl ValidDimension for NdRange<1> {
             )
         }
         .map(Into::into)
+        .map_err(Into::into)
     }
 }
 
@@ -101,6 +102,7 @@ impl ValidDimension for NdRange<2> {
             )
         }
         .map(Into::into)
+        .map_err(Into::into)
     }
 }
 
@@ -126,5 +128,6 @@ impl ValidDimension for NdRange<3> {
             )
         }
         .map(Into::into)
+        .map_err(Into::into)
     }
 }

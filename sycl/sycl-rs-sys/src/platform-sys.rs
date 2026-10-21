@@ -23,9 +23,9 @@ pub mod ffi {
         #[namespace = "sycl_shims"]
         type Platform = crate::types::ffi::Platform;
 
-        fn get_platforms() -> Vec<PlatformPtr>;
+        fn get_platforms() -> Result<Vec<PlatformPtr>>;
 
-        fn get_devices(platform: &Platform) -> Vec<DevicePtr>;
+        fn get_devices(platform: &Platform) -> Result<Vec<DevicePtr>>;
 
         fn get_version(platform: &Platform) -> String;
         fn get_name(platform: &Platform) -> String;

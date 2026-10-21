@@ -54,12 +54,12 @@
 //! #
 //! fn main() -> sycl_rs::Result<()> {
 //!     // 1. Create a Queue. It's the main entry point to the SYCL API.
-//!     let mut queue = Queue::new();
+//!     let mut queue = Queue::new()?;
 //!     let mut device_array = queue.alloc_device::<f32>(1024)?.wait()?;
 //!
 //!     // 3. Build a SYCL kernel.
 //!     let kernel = queue
-//!         .get_context()
+//!         .get_context()?
 //!         .create_kernel_bundle_from_source(IOTA_SRC)?
 //!         .build()?
 //!         .get_kernel("iota")?;
@@ -131,7 +131,15 @@ pub mod range;
 pub mod usm;
 pub mod usmbox;
 
-pub type SyclError = cxx::Exception;
+/// Errors reported by SYCL operations and USM allocation.
+#[derive(Debug, thiserror::Error)]
+pub enum SyclError {
+    #[error(transparent)]
+    Runtime(#[from] cxx::Exception),
+    #[error("invalid USM allocation layout")]
+    InvalidLayout(#[from] std::alloc::LayoutError),
+}
+
 pub type Result<T> = std::result::Result<T, SyclError>;
 
 mod private {

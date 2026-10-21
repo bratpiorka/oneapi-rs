@@ -26,8 +26,8 @@ pub mod ffi {
         #[namespace = "sycl_shims"]
         type Platform = crate::types::ffi::Platform;
 
-        fn get_devices() -> Vec<DevicePtr>;
-        fn get_platform(device: &Device) -> UniquePtr<Platform>;
+        fn get_devices() -> Result<Vec<DevicePtr>>;
+        fn get_platform(device: &Device) -> Result<UniquePtr<Platform>>;
         fn get_device_type(device: &Device) -> DeviceType;
         fn get_version(device: &Device) -> String;
         fn get_name(device: &Device) -> String;
@@ -39,9 +39,9 @@ pub mod ffi {
             device: &mut UniquePtr<Device>,
             peer: &Device,
             value: PeerAccess,
-        ) -> bool;
+        ) -> Result<bool>;
 
-        fn clone(device: &Device) -> UniquePtr<Device>;
+        fn clone(device: &Device) -> Result<UniquePtr<Device>>;
         fn has(device: &Device, aspect: Aspect) -> bool;
     }
 }

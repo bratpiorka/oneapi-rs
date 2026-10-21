@@ -26,7 +26,7 @@ impl Event {
     ///
     /// Dropping the event does not wait for its completion.
     pub fn wait(&mut self) -> Result<()> {
-        ffi::wait(&mut self.0)
+        ffi::wait(&mut self.0).map_err(Into::into)
     }
 }
 
@@ -41,7 +41,9 @@ impl From<cxx::UniquePtr<ffi::Event>> for Event {
 
 impl Clone for Event {
     fn clone(&self) -> Self {
-        ffi::clone(&self.0).into()
+        ffi::clone(&self.0)
+            .expect("failed to clone SYCL event")
+            .into()
     }
 }
 
@@ -62,7 +64,7 @@ impl Future for EventFuture {
         // Set the callback on first Future poll (Futures can't be active until polled)
         if !*this.set_callback {
             *this.set_callback = true;
-            let mut queue = Queue::new_immediate();
+            let mut queue = Queue::new_immediate()?;
             this.shared.waker.register(cx.waker());
 
             // Safety: registered callback will decrement the Arc strong reference count, which is
@@ -74,7 +76,7 @@ impl Future for EventFuture {
                     this.queue.replace(queue);
                 }
                 Err(_) => {
-                    return Poll::Ready(result);
+                    return Poll::Ready(result.map_err(Into::into));
                 }
             }
         } else {

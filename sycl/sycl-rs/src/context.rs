@@ -21,18 +21,21 @@ impl From<cxx::UniquePtr<ffi::Context>> for Context {
 }
 
 impl Context {
-    pub fn new(devices: &[&Device]) -> Self {
+    /// Creates a context, returning errors from device copies or context creation.
+    pub fn new(devices: &[&Device]) -> Result<Self> {
         let devices = devices
             .iter()
-            .map(|d| DevicePtr {
-                ptr: (*d).clone().0,
+            .map(|d| {
+                Ok(DevicePtr {
+                    ptr: sycl_rs_sys::device::ffi::clone(&d.0)?,
+                })
             })
-            .collect::<Vec<_>>();
+            .collect::<Result<Vec<_>>>()?;
 
-        ffi::new_context(devices).into()
+        Ok(ffi::new_context(devices)?.into())
     }
 
     pub fn create_kernel_bundle_from_source(&self, source: &str) -> Result<SourceKernelBundle> {
-        kernel_bundle::ffi::create_kernel_bundle_from_source(&self.0, source).map(Into::into)
+        Ok(kernel_bundle::ffi::create_kernel_bundle_from_source(&self.0, source)?.into())
     }
 }
