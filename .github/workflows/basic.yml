@@ -149,7 +149,9 @@ jobs:
     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
     - name: Audit dependencies against RustSec
-      run: cargo +stable audit --deny unsound --format sarif > cargo-audit.sarif
+      run: |
+        audit_dir="$(mktemp -d "$RUNNER_TEMP/rustsec.XXXXXX")"
+        cargo +stable audit --db "$audit_dir/advisory-db" --deny unsound --format sarif > cargo-audit.sarif
 
     - name: Upload RustSec findings
       # Upload the report even when the audit step fails on findings.
