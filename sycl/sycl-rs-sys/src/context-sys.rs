@@ -20,6 +20,6 @@ pub mod ffi {
         #[namespace = "sycl_shims"]
         type Context = crate::types::ffi::Context;
 
-        fn new_context(devices: Vec<DevicePtr>) -> UniquePtr<Context>;
+        fn new_context(devices: Vec<DevicePtr>) -> Result<UniquePtr<Context>>;
     }
 }

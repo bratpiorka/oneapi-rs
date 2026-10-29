@@ -31,7 +31,7 @@ pub mod ffi {
         fn get_device_type(device: &Device) -> DeviceType;
         fn get_version(device: &Device) -> String;
         fn get_name(device: &Device) -> String;
-        fn get_pci_bdf_address(device: &Device) -> String;
+        fn get_pci_bdf_address(device: &Device) -> Result<String>;
 
         fn enable_peer_access(device: &mut UniquePtr<Device>, peer: &Device) -> Result<()>;
         fn disable_peer_access(device: &mut UniquePtr<Device>, peer: &Device) -> Result<()>;

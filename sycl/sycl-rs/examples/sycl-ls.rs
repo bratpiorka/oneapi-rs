@@ -17,10 +17,9 @@ fn main() {
             let device_version = device.get_info::<info::device::Version>();
             let platform_version = platform.get_info::<info::platform::Version>();
 
-            let pci_bdf_address = if device.has(Aspect::ExtIntelPciAddress) {
-                device.get_info::<info::device::PciBdfAddress>()
-            } else {
-                String::from("N/A")
+            let pci_bdf_address = match device.get_info::<info::device::PciBdfAddress>() {
+                Ok(address) => address,
+                Err(_) => String::from("N/A"),
             };
 
             let integrated_status = if device.has(Aspect::ExtOneapiIsIntegratedGpu) {
