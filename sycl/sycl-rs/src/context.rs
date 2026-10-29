@@ -21,7 +21,10 @@ impl From<cxx::UniquePtr<ffi::Context>> for Context {
 }
 
 impl Context {
-    pub fn new(devices: &[&Device]) -> Self {
+    /// Constructs a context for devices from the same platform.
+    ///
+    /// Returns an error if the device list is empty or context construction fails.
+    pub fn new(devices: &[&Device]) -> Result<Self> {
         let devices = devices
             .iter()
             .map(|d| DevicePtr {
@@ -29,7 +32,7 @@ impl Context {
             })
             .collect::<Vec<_>>();
 
-        ffi::new_context(devices).into()
+        ffi::new_context(devices).map(Into::into)
     }
 
     pub fn create_kernel_bundle_from_source(&self, source: &str) -> Result<SourceKernelBundle> {

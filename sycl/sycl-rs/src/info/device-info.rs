@@ -8,11 +8,7 @@
 
 use sycl_rs_sys::device::ffi;
 
-use crate::{
-    device::{Aspect, Device},
-    info::Info,
-    private::Sealed,
-};
+use crate::{Result, device::Device, info::Info, private::Sealed};
 
 /// Returns the device type associated with the device. May not return `sycl_rs::info::DeviceType::All`
 pub struct DeviceType;
@@ -48,17 +44,13 @@ impl Info for Name {
 }
 
 /// Returns the PCI BDF address reported by the Intel SYCL extension.
-/// Panics when the device does not support the extension.
+/// Returns an error when the device does not support the extension or the query fails.
 pub struct PciBdfAddress;
 impl Sealed for PciBdfAddress {}
 impl Info for PciBdfAddress {
-    type Item = String;
+    type Item = Result<String>;
     type Target = Device;
     fn get_item(target: &Self::Target) -> Self::Item {
-        assert!(
-            target.has(Aspect::ExtIntelPciAddress),
-            "device does not support the Intel PCI address extension"
-        );
         ffi::get_pci_bdf_address(&target.0)
     }
 }
